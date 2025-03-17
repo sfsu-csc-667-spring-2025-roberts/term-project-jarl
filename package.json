@@ -5,7 +5,8 @@
   "scripts": {
     "start": "ts-node src/server/index.ts",
     "start:dev": "nodemon --exec ts-node src/server/index.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "prettier --write ./src"
   },
   "repository": {
     "type": "git",
