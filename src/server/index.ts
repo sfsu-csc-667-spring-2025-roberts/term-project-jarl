@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 import rootRoutes from "./routes/root";
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 app.use(morgan("dev"));
 app.use(express.json());
