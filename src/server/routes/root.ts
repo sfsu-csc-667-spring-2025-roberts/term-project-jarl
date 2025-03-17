@@ -3,7 +3,11 @@ import express from 'express';
 const router = express.Router();
 
 router.get("/", (request, response, next) => {
-    response.send("Hello World from route root.ts!");
+    // replace vars with db calls
+    const title = "Jarl's site";
+    const message = "Welcome to my site!";
+
+    response.render("root", { message });
 })
 
 export default router;

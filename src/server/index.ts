@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import express from 'express';
 import httpErrors from 'http-errors';
 
@@ -5,9 +7,14 @@ import rootRoutes from './routes/root';
 import { timeMiddleware } from './middleware/time';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 app.use(timeMiddleware);
+
+app.use(express.static(path.join(process.cwd(), "public")));
+
+app.set("views", path.join(process.cwd(), "views"));
+app.set("view engine", "ejs");
 
 app.use("/", rootRoutes);
 app.use("/test", () => {});
