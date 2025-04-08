@@ -7,7 +7,7 @@ router.get("/", (request, response, next) => {
   const title = "Jarl's site";
   const message = "Welcome to my site!";
 
-  response.render("root", { message });
+  response.render("root", { title, message });
 });
 
 export default router;

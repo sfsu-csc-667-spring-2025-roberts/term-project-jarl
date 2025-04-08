@@ -5,9 +5,28 @@ import httpErrors from "http-errors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
+import livereload from "livereload";
+import connectLivereload from "connect-livereload";
+
+import dotenv from "dotenv";
+dotenv.config();
+const app = express();
+
+if (process.env.NODE_ENV !== "production") {
+  const reloadServer = livereload.createServer();
+
+  reloadServer.watch(path.join(process.cwd(), "public", "js"));
+  reloadServer.server.once("connection", () => {
+    setTimeout(() => {
+      reloadServer.refresh("/");
+    }, 100);
+  });
+
+  app.use(connectLivereload());
+}
+
 import rootRoutes from "./routes/root";
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(morgan("dev"));
