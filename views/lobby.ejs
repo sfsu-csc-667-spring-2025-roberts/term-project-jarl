@@ -1,0 +1,36 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Skip-bo | Lobby</title>
+    <%- include('shared/head') %>
+  </head>
+  <body>
+    <div id="container">
+      <%- include('shared/menu') %>
+      <h1>
+        <img
+          class="gravatar"
+          src="https://gravatar.com/avatar/<%= user.gravatar %>"
+        />
+        Welcome <%= user.email %> (<%= user.id %>)
+      </h1>
+      <div id="lobby-container">
+        <section>Games go here</section>
+
+        <section id="chat">
+          <div></div>
+          <form class="chat-form">
+            <input
+              type="text"
+              id="message"
+              name="message"
+              placeholder="Type your message here..."
+            />
+            <button type="submit">Send</button>
+          </form>
+        </section>
+      </div>
+    </div>
+    <%- include('shared/templates') %>
+  </body>
+</html>
