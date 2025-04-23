@@ -1,36 +1,57 @@
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
-/******/ (() => {
-  // webpackBootstrap
-  /******/ "use strict";
-  /******/ var __webpack_modules__ = {
-    /***/ "./src/client/index.ts":
-      /*!*****************************!*\
-  !*** ./src/client/index.ts ***!
-  \*****************************/
-      /***/ () => {
-        eval(
-          '\nconsole.log("Client code is running after updating the code!");\n\n\n//# sourceURL=webpack://term-project-jarl/./src/client/index.ts?',
-        );
+// public/js/main.js
+document.addEventListener("DOMContentLoaded", () => {
+  // Flash messages auto-dismiss
+  const alertMessages = document.querySelectorAll(".alert");
+  alertMessages.forEach((alert) => {
+    setTimeout(() => {
+      alert.classList.add("fade");
+      setTimeout(() => {
+        alert.remove();
+      }, 500);
+    }, 3000);
+  });
 
-        /***/
-      },
+  // Password strength validation
+  const passwordFields = document.querySelectorAll('input[type="password"]');
+  passwordFields.forEach((field) => {
+    field.addEventListener("input", () => {
+      const password = field.value;
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const isLongEnough = password.length >= 8;
 
-    /******/
-  };
-  /************************************************************************/
-  /******/
-  /******/ // startup
-  /******/ // Load entry module and return exports
-  /******/ // This entry module can't be inlined because the eval devtool is used.
-  /******/ var __webpack_exports__ = {};
-  /******/ __webpack_modules__["./src/client/index.ts"]();
-  /******/
-  /******/
-})();
+      // Update password strength indicator if it exists
+      const strengthIndicator =
+        field.parentElement.querySelector(".password-strength");
+      if (strengthIndicator) {
+        let strength = 0;
+        let strengthText = "";
+
+        if (hasUpperCase) strength++;
+        if (hasLowerCase) strength++;
+        if (hasNumber) strength++;
+        if (isLongEnough) strength++;
+
+        switch (strength) {
+          case 0:
+          case 1:
+            strengthText = "Weak";
+            strengthIndicator.className = "password-strength text-danger";
+            break;
+          case 2:
+          case 3:
+            strengthText = "Medium";
+            strengthIndicator.className = "password-strength text-warning";
+            break;
+          case 4:
+            strengthText = "Strong";
+            strengthIndicator.className = "password-strength text-success";
+            break;
+        }
+
+        strengthIndicator.textContent = strengthText;
+      }
+    });
+  });
+});

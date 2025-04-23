@@ -1,20 +1,23 @@
+// src/server/routes/test.ts
 import express from "express";
-import { Request, Response } from "express";
-
-import db from "../db/connection";
+import pool from "../db/connection";
 
 const router = express.Router();
 
-router.get("/", async (request: Request, response: Response) => {
+router.post("/test", async (req, res) => {
   try {
-    db.none("INSERT INTO test_table (test_string) VALUES ($1)", [
-      `Test string ${new Date().toISOString()}`,
+    // Replace db.none with pool.query without expecting a return value
+    await pool.query("INSERT INTO test_table (test_string) VALUES ($1)", [
+      "Test successful at " + new Date().toISOString(),
     ]);
 
-    const result = await db.any("SELECT * FROM test_table");
-    response.json(result);
+    // Replace db.any with pool.query and use rows property
+    const result = await pool.query("SELECT * FROM test_table");
+
+    res.json({ success: true, result: result.rows });
   } catch (error) {
-    console.error(error);
+    console.error("Error in test route:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

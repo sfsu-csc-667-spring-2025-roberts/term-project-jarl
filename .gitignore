@@ -1,2 +1,6 @@
-node_modules/
 .env
+node_modules/
+debug-*.*
+simple-*.*
+*-test.js
+*-test.ts
