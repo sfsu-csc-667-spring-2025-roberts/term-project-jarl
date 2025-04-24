@@ -1,10 +1,14 @@
 // src/server/db/connection.ts
-import { Pool } from "pg";
+import pgPromise from "pg-promise";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = new Pool({
+// Initialize pg-promise with options (empty for now, but you can add options later)
+const pgp = pgPromise();
+
+// Create the database connection
+const db = pgp({
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || "5432"),
   database: process.env.DB_NAME,
@@ -12,4 +16,4 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
-export default pool;
+export default db;

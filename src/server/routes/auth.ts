@@ -4,11 +4,11 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import nodemailer from "nodemailer";
 import User from "../db/models/user";
-import pool from "../db/connection";
+import db from "../db/connection";
 import { validateEmail, validatePassword } from "../utils/validation";
 
 const router = express.Router();
-const userModel = new User(pool);
+const userModel = new User(db);
 
 // Configure nodemailer with Mailtrap
 const transporter = nodemailer.createTransport({
@@ -131,12 +131,10 @@ router.post("/forgot-password", function (req, res) {
       const user = await userModel.findByEmail(email);
       if (!user) {
         // For security reasons, don't reveal that email doesn't exist
-        return res
-          .status(200)
-          .json({
-            message:
-              "If your email exists in our system, you will receive a password reset link",
-          });
+        return res.status(200).json({
+          message:
+            "If your email exists in our system, you will receive a password reset link",
+        });
       }
 
       // Generate token
@@ -163,12 +161,10 @@ router.post("/forgot-password", function (req, res) {
 
       await transporter.sendMail(mailOptions);
 
-      return res
-        .status(200)
-        .json({
-          message:
-            "If your email exists in our system, you will receive a password reset link",
-        });
+      return res.status(200).json({
+        message:
+          "If your email exists in our system, you will receive a password reset link",
+      });
     } catch (error) {
       console.error("Error requesting password reset:", error);
       return res.status(500).json({ error: "Internal server error" });

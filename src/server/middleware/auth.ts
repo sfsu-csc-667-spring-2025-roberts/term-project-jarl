@@ -1,9 +1,9 @@
 // src/server/middleware/auth.ts
 import express from "express";
 import User from "../db/models/user";
-import pool from "../db/connection";
+import db from "../db/connection";
 
-const userModel = new User(pool);
+const userModel = new User(db);
 
 export const requireAuth = async (
   req: express.Request,

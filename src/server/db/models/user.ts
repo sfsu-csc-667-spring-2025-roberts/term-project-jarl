@@ -1,58 +1,43 @@
 // src/server/db/models/user.ts
-import { Pool } from "pg";
+import pgPromise from "pg-promise";
 import bcrypt from "bcrypt";
 
 class User {
-  private pool: Pool;
+  private db: pgPromise.IDatabase<any>;
 
-  constructor(pool: Pool) {
-    this.pool = pool;
+  constructor(db: pgPromise.IDatabase<any>) {
+    this.db = db;
   }
 
   async create(username: string, email: string, password: string) {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const query = {
-      text: "INSERT INTO users(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email",
-      values: [username, email, hashedPassword],
-    };
-
-    const result = await this.pool.query(query);
-    return result.rows[0];
+    return this.db.one(
+      "INSERT INTO users(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email",
+      [username, email, hashedPassword],
+    );
   }
 
   async findByEmail(email: string) {
-    const query = {
-      text: "SELECT * FROM users WHERE email = $1",
-      values: [email],
-    };
-
-    const result = await this.pool.query(query);
-    return result.rows[0];
+    return this.db.oneOrNone("SELECT * FROM users WHERE email = $1", [email]);
   }
 
   async findById(id: number) {
-    const query = {
-      text: "SELECT id, username, email FROM users WHERE id = $1",
-      values: [id],
-    };
-
-    const result = await this.pool.query(query);
-    return result.rows[0];
+    return this.db.oneOrNone(
+      "SELECT id, username, email FROM users WHERE id = $1",
+      [id],
+    );
   }
 
   async updatePassword(userId: number, newPassword: string) {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    const query = {
-      text: "UPDATE users SET password = $1 WHERE id = $2 RETURNING id",
-      values: [hashedPassword, userId],
-    };
-
-    const result = await this.pool.query(query);
-    return result.rows[0];
+    return this.db.one(
+      "UPDATE users SET password = $1 WHERE id = $2 RETURNING id",
+      [hashedPassword, userId],
+    );
   }
 
   async createPasswordResetToken(
@@ -60,32 +45,23 @@ class User {
     token: string,
     expiresAt: Date,
   ) {
-    const query = {
-      text: "INSERT INTO password_reset_tokens(email, token, expires_at) VALUES($1, $2, $3) RETURNING id",
-      values: [email, token, expiresAt],
-    };
-
-    const result = await this.pool.query(query);
-    return result.rows[0];
+    return this.db.one(
+      "INSERT INTO password_reset_tokens(email, token, expires_at) VALUES($1, $2, $3) RETURNING id",
+      [email, token, expiresAt],
+    );
   }
 
   async findPasswordResetToken(token: string) {
-    const query = {
-      text: "SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW()",
-      values: [token],
-    };
-
-    const result = await this.pool.query(query);
-    return result.rows[0];
+    return this.db.oneOrNone(
+      "SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW()",
+      [token],
+    );
   }
 
   async deletePasswordResetToken(token: string) {
-    const query = {
-      text: "DELETE FROM password_reset_tokens WHERE token = $1",
-      values: [token],
-    };
-
-    await this.pool.query(query);
+    return this.db.none("DELETE FROM password_reset_tokens WHERE token = $1", [
+      token,
+    ]);
   }
 }
 

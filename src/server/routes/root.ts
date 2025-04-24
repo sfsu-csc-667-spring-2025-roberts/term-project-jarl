@@ -1,10 +1,10 @@
 // src/server/routes/root.ts
 import express from "express";
 import User from "../db/models/user";
-import pool from "../db/connection";
+import db from "../db/connection";
 
 const router = express.Router();
-const userModel = new User(pool);
+const userModel = new User(db);
 
 // Home page
 router.get("/", async (req, res) => {

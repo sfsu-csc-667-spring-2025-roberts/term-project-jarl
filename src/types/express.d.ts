@@ -1,22 +1,10 @@
-// src/types/express.d.ts
+// src/server/types/express.d.ts
 import express from "express";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        id: number;
-        username: string;
-        email: string;
-      };
+      user?: any;
     }
   }
 }
-
-declare module "express-session" {
-  interface SessionData {
-    userId?: number;
-  }
-}
-
-export {};
