@@ -5,7 +5,7 @@ import db from "../db/connection";
 
 const userModel = new User(db);
 
-export const requireAuth = async (
+export const auth = async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
@@ -14,13 +14,15 @@ export const requireAuth = async (
     const userId = req.session.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
+      res.status(401).json({ error: "Authentication required" });
+      return;
     }
 
     const user = await userModel.findById(userId);
     if (!user) {
       req.session.destroy(() => {});
-      return res.status(401).json({ error: "Authentication required" });
+      res.status(401).json({ error: "Authentication required" });
+      return;
     }
 
     // Make user available in request
@@ -29,6 +31,9 @@ export const requireAuth = async (
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
+    return;
   }
 };
+
+export default auth;

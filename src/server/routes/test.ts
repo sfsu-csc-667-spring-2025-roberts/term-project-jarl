@@ -1,6 +1,8 @@
 // src/server/routes/test.ts
 import express from "express";
 import db from "../db/connection";
+import { Request, Response } from "express";
+import type { Server } from "socket.io";
 
 const router = express.Router();
 
