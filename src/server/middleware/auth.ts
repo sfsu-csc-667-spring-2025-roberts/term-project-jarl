@@ -26,7 +26,7 @@ export const auth = async (
     }
 
     // Make user available in request
-    // req.user doesn't exist so I commented it out
+    // this doesn't exist, and causes an error so I commented it out
     // req.user = user;
 
     next();
