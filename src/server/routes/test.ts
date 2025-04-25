@@ -1,44 +1,23 @@
-// OLD TEST FILE
-// import express from "express";
-// import { Request, Response } from "express";
-
-// import db from "../db/connection";
-
-// const router = express.Router();
-
-// router.get("/", async (request: Request, response: Response) => {
-//   try {
-//     db.none("INSERT INTO test_table (test_string) VALUES ($1)", [
-//       `Test string ${new Date().toISOString()}`,
-//     ]);
-
-//     const result = await db.any("SELECT * FROM test_table");
-//     response.json(result);
-//   } catch (error) {
-//     console.error(error);
-//   }
-// });
-
-// export default router;
-
+// src/server/routes/test.ts
 import express from "express";
-import { Request, Response } from "express";
-import type { Server } from "socket.io";
-
 import db from "../db/connection";
 
 const router = express.Router();
 
-router.get("/", async (_request: Request, response: Response) => {
+router.post("/test", async (req, res) => {
   try {
+    // Use db.none for queries that don't return data
     await db.none("INSERT INTO test_table (test_string) VALUES ($1)", [
-      `Test string ${new Date().toISOString()}`,
+      "Test successful at " + new Date().toISOString(),
     ]);
 
-    response.json(await db.any("SELECT * FROM test_table"));
+    // Use db.any for queries that return multiple rows
+    const result = await db.any("SELECT * FROM test_table");
+
+    res.json({ success: true, result });
   } catch (error) {
-    console.error(error);
-    response.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in test route:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

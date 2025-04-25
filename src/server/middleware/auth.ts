@@ -1,19 +1,34 @@
-import type { Request, Response, NextFunction } from "express";
+// src/server/middleware/auth.ts
+import express from "express";
+import User from "../db/models/user";
+import db from "../db/connection";
 
-const authMiddleware = (
-  request: Request,
-  response: Response,
-  next: NextFunction,
+const userModel = new User(db);
+
+export const requireAuth = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
 ) => {
-  // @ts-ignore
-  if (request.session.user) {
-    // @ts-ignore
-    response.locals.user = request.session.user;
+  try {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      req.session.destroy(() => {});
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    // Make user available in request
+    req.user = user;
 
     next();
-  } else {
-    response.redirect("/auth/login");
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
-
-export default authMiddleware;
