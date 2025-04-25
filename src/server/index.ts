@@ -49,7 +49,7 @@ try {
 
   console.log("Creating Express app...");
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT;
 
   console.log("Setting up basic middleware...");
   app.use(express.json());
