@@ -14,7 +14,7 @@ class User {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     return this.db.one(
-      "INSERT INTO users(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email",
+      "INSERT INTO users(username, email, password) VALUES($1, $2, $3) RETURNING user_id, username, email",
       [username, email, hashedPassword],
     );
   }

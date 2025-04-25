@@ -7,9 +7,6 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 
-import livereload from "livereload";
-import connectLivereload from "connect-livereload";
-
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -128,8 +125,6 @@ try {
   process.exit(1);
 }
 
-const PORT = process.env.PORT || 3000;
-
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -147,8 +142,4 @@ app.use("/lobby", middleware.auth, routes.lobby);
 
 app.use((_request, _response, next) => {
   next(httpErrors(404));
-});
-
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });
