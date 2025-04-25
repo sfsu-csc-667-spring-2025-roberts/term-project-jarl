@@ -139,6 +139,7 @@ app.use("/test", testRouter);
 app.use("/auth", routes.auth);
 app.use("/chat", middleware.auth, routes.chat);
 app.use("/lobby", middleware.auth, routes.lobby);
+app.use("/friends", middleware.auth, routes.friends);
 
 app.use((_request, _response, next) => {
   next(httpErrors(404));

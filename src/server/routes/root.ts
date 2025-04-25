@@ -69,4 +69,14 @@ router.get("/reset-password", (req, res) => {
   });
 });
 
+router.get("/friends", (req, res) => {
+  console.log("Friends route accessed");
+  if (!req.session.userId) {
+    return res.redirect("/signin");
+  }
+  // Assuming you have a function to get friends from the database
+  const friends = ["John", "Clair", "Joe"]; // Replace with actual database call
+  res.render("friends", { friends: friends });
+});
+
 export default router;

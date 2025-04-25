@@ -118,7 +118,7 @@ router.post("/signout", function (req, res) {
     if (err) {
       return res.status(500).json({ error: "Error signing out" });
     }
-    res.clearCookie("connect.sid");
+    res.clearCookie("poker.sid");
     return res.status(200).json({ message: "Signed out successfully" });
   });
 });
