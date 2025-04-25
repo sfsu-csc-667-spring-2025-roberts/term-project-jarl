@@ -25,7 +25,7 @@ class User {
 
   async findById(id: number) {
     return this.db.oneOrNone(
-      "SELECT id, username, email FROM users WHERE id = $1",
+      "SELECT user_id, username, email FROM users WHERE user_id = $1",
       [id],
     );
   }
@@ -35,7 +35,7 @@ class User {
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
     return this.db.one(
-      "UPDATE users SET password = $1 WHERE id = $2 RETURNING id",
+      "UPDATE users SET password = $1 WHERE user_id = $2 RETURNING user_id",
       [hashedPassword, userId],
     );
   }
@@ -46,7 +46,7 @@ class User {
     expiresAt: Date,
   ) {
     return this.db.one(
-      "INSERT INTO password_reset_tokens(email, token, expires_at) VALUES($1, $2, $3) RETURNING id",
+      "INSERT INTO password_reset_tokens(email, token, expires_at) VALUES($1, $2, $3) RETURNING user_id",
       [email, token, expiresAt],
     );
   }

@@ -93,7 +93,13 @@ router.post("/signin", function (req, res) {
       }
 
       // Set user in session
-      req.session.userId = user.id;
+      req.session.userId = user.user_id;
+      req.session.save((err) => {
+        if (err) {
+          console.error("Error saving session:", err);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+      });
 
       return res.status(200).json({
         message: "Signed in successfully",
