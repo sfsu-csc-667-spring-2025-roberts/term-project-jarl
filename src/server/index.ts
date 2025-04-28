@@ -52,7 +52,7 @@ try {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(express.static(path.join(__dirname, "../../public")));
-
+  app.use(morgan("dev"));
   console.log("Setting up session middleware...");
   app.use(
     session({

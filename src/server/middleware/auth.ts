@@ -27,7 +27,8 @@ export const auth = async (
 
     // Make user available in request
     // this doesn't exist, and causes an error so I commented it out
-    // req.user = user;
+    // @ts-ignore
+    req.user = user;
 
     next();
   } catch (error) {

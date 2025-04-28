@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <div id="create-game-container" class="hidden">
+        <!-- this should only show when user is signed in
+         only showing so developing is easier since it signs out when i refresh -->
+        <form action="/games" method="POST">
+          <a href="#" id="hide-create-form">x</a>
+          <div>
+            <label for="game-name">Game Name:</label>
+            <input
+              type="text"
+              id="game-name"
+              name="gameName"
+              placeholder="Enter game name"
+              required
+            />
+          </div>
+          <div>
+            <label for="game-min-players">Min Players:</label>
+            <input
+              type="number"
+              id="game-min-players"
+              name="minPlayers"
+              min="2"
+              max="4"
+              required
+            />
+          </div>
+    
+          <div>
+            <label for="game-max-players">Max Players:</label>
+            <input
+              type="number"
+              id="game-max-players"
+              name="maxPlayers"
+              min="2"
+              max="4"
+              required
+            />
+          </div>
+          <!-- should maybe make this optional -->
+          <div>
+            <label for="password">Password:</label>
+            <input
+              type="text"
+              id="password"
+              name="password"
+              placeholder="Enter password"
+            />
+          </div>
+          <button type="submit" value="Create Game">Create Game </button>
+        </form>
+      </div>
+</body>
+</html>

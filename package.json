@@ -8,7 +8,7 @@
     "backend:dev": "nodemon --exec ts-node src/server/index.ts --ext ts,ejs,css",
     "server:dev": "nodemon --exec ts-node src/server/index.ts --ext ejs,ts --ignore public",
     "frontend": "webpack --config webpack.config.ts",
-    "frontend:dev": "webpack --config webpack.config.ts --mode development",
+    "frontend:dev": "webpack --config webpack.config.ts --mode development --watch",
     "prepare": "husky",
     "db:create": "node-pg-migrate create -j ts --",
     "db:migrate1": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js up -j ts -d postgres --migration-file-language ts --migration-table pgmigrations --migration-schema public",
