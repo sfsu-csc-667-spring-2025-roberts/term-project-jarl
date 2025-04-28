@@ -111,6 +111,15 @@ try {
     console.error("Failed to load auth router:", err);
   }
 
+  console.log("About to load game router...");
+  try {
+    const gameRouter = require("./routes/games").default;
+    app.use("/games", gameRouter);
+    console.log("games router loaded successfully");
+  } catch (err) {
+    console.error("Failed to load game router:", err);
+  }
+
   // Start the server
   console.log("Starting server...");
   const server = app.listen(PORT, () => {

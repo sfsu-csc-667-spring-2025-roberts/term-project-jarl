@@ -93,6 +93,9 @@ router.post("/signin", function (req, res) {
       }
 
       // Set user in session
+      // @ts-ignore
+      req.session.user = user;
+      // @ts-ignore
       req.session.userId = user.user_id;
       req.session.save((err) => {
         if (err) {

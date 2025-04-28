@@ -9,16 +9,12 @@ const hideCreateGameContainer =
 createGameButton!.addEventListener("click", (e) => {
   e.preventDefault();
   console.log("create game button clicked");
-
   createGameContainer!.classList.toggle("hidden");
 });
 
-console.log(hideCreateGameContainer!);
-console.log("ddd");
 hideCreateGameContainer!.addEventListener("click", (e) => {
   e.preventDefault();
   console.log("hide create game form button clicked");
-
   createGameContainer!.classList.toggle("hidden");
 });
 

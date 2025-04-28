@@ -35,7 +35,7 @@ body {
   color: rgba(255, 255, 255, 1);
 }
 
-/* some lobby and game creation css, separate into its own file later */
+/* TODO: some lobby and game creation css, separate into its own file later */
 div#create-game-container {
   position: absolute;
   top: 0;
