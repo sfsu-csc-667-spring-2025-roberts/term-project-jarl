@@ -1,6 +1,7 @@
 import express from "express";
 import { Request, Response } from "express";
 import { Game } from "../db";
+import { Server } from "socket.io";
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 
 router.post("/create", async (request: Request, response: Response) => {
   // @ts-ignore
-  const { user_id: userId } = request.session.user;
+  const { user_id: userId, email, gravatar } = request.session.user;
   const { gameName, gameMinPlayers, gameMaxPlayers, gamePassword } =
     request.body;
 
@@ -21,6 +22,19 @@ router.post("/create", async (request: Request, response: Response) => {
       gamePassword,
     );
     if (gameId) {
+      const io = request.app.get<Server>("io");
+      io.emit("game:created", {
+        gameId,
+        gameName: gameName ?? `Game ${gameId}`,
+        gameMinPlayers,
+        gameMaxPlayers,
+        hasPassword: gamePassword !== undefined,
+        host: {
+          user_id: userId,
+          email,
+          gravatar,
+        },
+      });
       response.redirect(`/games/${gameId}`);
     } else {
       response.status(500).send("error creating game here");
@@ -28,6 +42,32 @@ router.post("/create", async (request: Request, response: Response) => {
   } catch (err) {
     console.error("error creating game: ", err);
     response.status(500).send("error creating game");
+  }
+});
+
+router.post("/join", async (request: Request, response: Response) => {
+  // @ts-ignore
+  const { user_id: userId, email, gravatar } = request.session.user;
+  const { gameId, gamePassword } = request.body;
+
+  try {
+    const playerCount = await Game.conditionalJoin(
+      gameId,
+      userId,
+      gamePassword,
+    );
+    const io = request.app.get<Server>("io");
+    io.emit(`game:${gameId}:player-joined`, {
+      playerCount,
+      userId,
+      email,
+      gravatar,
+    });
+
+    response.redirect(`/games/${gameId}`);
+  } catch (error) {
+    console.error("error joining game: ", error);
+    response.status(500).send("error joining game");
   }
 });
 

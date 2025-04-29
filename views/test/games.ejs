@@ -1,0 +1,44 @@
+<html>
+    <body>
+        <a href="#" id="create-test-user">Create a user </a>
+        <h1>Create a game</h1>
+        <form id="test-create-game" method="POST">
+            <label for="gameName">Game Name:</label>
+            <input type="text" name="gameName" />
+            <label for="gameMinPlayers">Min Players:</label>
+            <input type="text" name="gameMinPlayers" />
+            <label for="gameMaxPlayers">Max Players:</label>
+            <input type="text" name="gameMaxPlayers" />
+            <label for="gamePassword">password:</label>
+            <input type="text" name="gamePassword" />
+            <button type="submit">Create</button>
+
+        </form>
+
+        <script>
+            document.getElementById('test-create-game').addEventListener("submit", (e) => {
+                e.preventDefault()
+                // finish the rest of the code
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                console.log(data);
+                fetch('/test/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log(`success:${result}`);
+                    // Handle success (e.g., display a message or redirect)
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Handle error (e.g., display an error message)
+                });
+            })
+        </script>
+    </body>
+</html>

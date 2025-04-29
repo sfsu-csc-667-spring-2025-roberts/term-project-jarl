@@ -27,4 +27,47 @@ const join = async (gameId: number, userId: number, isHost = false) => {
   await db.none(JOIN_SQL, [gameId, userId, isHost]);
 };
 
-export default { create, join };
+const CONDITIONAL_JOIN_SQL = `
+    INSERT INTO gamePlayers (game_id, user_id)
+    SELECT $(gameId), $(userId) 
+    WHERE NOT EXISTS (
+    SELECT 'value-doesnt-matter' 
+    FROM gamePlayers 
+    WHERE game_id=$(gameId) AND user_id=$(userId)
+    )
+    AND (
+    SELECT COUNT(*) FROM games WHERE id=$(gameId) AND password=$(password)
+    ) = 1
+    AND (
+    (
+        SELECT COUNT(*) FROM gamePlayers WHERE game_id=$(gameId)
+    ) < (
+        SELECT max_players FROM games WHERE id=$(gameId)
+    )
+    )
+    RETURNING (
+    SELECT COUNT(*) FROM gamePlayers WHERE game_id=$(gameId)
+    )
+`;
+
+const conditionalJoin = async (
+  gameId: number,
+  userId: number,
+  password: string,
+) => {
+  const { player_count } = await db.one(CONDITIONAL_JOIN_SQL, [
+    gameId,
+    userId,
+    password,
+  ]);
+  return player_count;
+};
+
+const playerCount = async (gameId: number) => {
+  const { count } = await db.one(
+    "SELECT COUNT(*) FROM gamePlayers WHERE game_id = $1",
+    [gameId],
+  );
+};
+
+export default { create, join, conditionalJoin, playerCount };
