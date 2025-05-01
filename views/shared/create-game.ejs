@@ -7,8 +7,6 @@
 </head>
 <body>
     <div id="create-game-container" class="hidden">
-        <%# TODO: this should only show when user is signed in %>
-        <%# only showing so developing is easier since it signs out when i refresh %>
         <form action="/games/create" method="POST">
           <a href="#" id="hide-create-form">x</a>
           <div>
@@ -18,7 +16,6 @@
               id="game-name"
               name="gameName"
               placeholder="Enter game name"
-              required
             />
           </div>
           <!-- adjust form inputs and labels based on our own game table fields-->
@@ -29,8 +26,8 @@
               id="game-min-players"
               name="gameMinPlayers"
               min="2"
-              max="4"
-              required
+              max="8"
+              value="2"
             />
           </div>
     
@@ -41,8 +38,8 @@
               id="game-max-players"
               name="gameMaxPlayers"
               min="2"
-              max="4"
-              required
+              max="8"
+              value="4"
             />
           </div>
           <!-- <div>
@@ -54,17 +51,16 @@
               min="1"
               required
             /> -->
-          <!-- should maybe make this optional -->
           <div>
             <label for="password">Password:</label>
             <input
               type="text"
-              id="password"
+              id="gamePassword"
               name="gamePassword"
               placeholder="Enter password"
             />
           </div>
-          <button type="submit" value="Create Game">Create Game </button>
+          <button id="create-game-btn" type="submit" value="Create Game">Create Game</button>
         </form>
       </div>
 </body>
