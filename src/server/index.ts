@@ -45,7 +45,7 @@ try {
   dotenv.config();
 
   console.log("Creating Express app...");
-  const app = express();
+  // const app = express(); // This line is already executed earlier, which throws away the previous app instance
   const PORT = process.env.PORT;
 
   console.log("Setting up basic middleware...");
