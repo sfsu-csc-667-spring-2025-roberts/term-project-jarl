@@ -4,5 +4,4 @@ export { default as auth } from "./auth";
 export { default as lobby } from "./lobby";
 export { default as chat } from "./chat";
 export { default as games } from "./games";
-export { default as request } from "./request";
-export { default as reject } from "./reject";
+export { default as friends } from "./friends";

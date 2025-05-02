@@ -93,45 +93,11 @@
         <h3>Friends List</h3>
         <!-- Friends list goes here -->
         <form id="friend-request-form" style="display: flex; align-items: flex-end; gap: 5px; margin-top: 5px; height: 100%;">
-          <input type="text" name="friendId" placeholder="Type username..." style="flex: 1;" />
+          <input type="text" name="friendId" placeholder="Enter user id..." style="flex: 1;" />
           <button type="submit">Send Friend Request</button>
         </form>
 
-        <script>
-          const form = document.querySelector('#friend-request-form');
-
-          form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent the default form submission
-
-            const friendId = document.querySelector('input[name="friendId"]').value;
-
-            try {
-              const response = await fetch("/send-request", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ friendId }),
-              })
-
-              const result = await response.json();
-
-              if (response.ok) {
-                alert("Friend request sent successfully!");
-              } else {
-                alert("Error sending friend request: " + result.error);
-              }
-            } catch (error) {
-              console.error("Error:", error);
-              alert("An error occurred while sending the friend request.");
-            }
-          });
-        </script>
-
         <div style="height: 100px; border: 1px solid black;">
-          <% if (locals.friends.length === 0) { %>
-            <p>No friends found. Add some friends to see them here!</p>
-          <% } else { %>
             <% for (let i = 0; i < locals.friends.length; i++) { %>
               <div style="display: flex; justify-content: space-between; padding: 5px;">
                 <span><%= locals.friends[i].friend_id %></span>
@@ -142,40 +108,18 @@
                 <% } %>
               </div>
             <% } %>
+
+          <!-- Friend Requests -->
+          <% for (let i = 0; i < locals.requests.length; i++) { %>
+            <div style="display: flex; justify-content: space-between; padding: 5px;">
+              <span><%= locals.requests[i].user_id %></span>
+              <div>
+                <button type="button" class="approve-friend" data-id="<%= locals.requests[i].user_id %>">Approve</button>
+                <button type="button" class="reject-friend" data-id="<%= locals.requests[i].user_id %>">Reject</button>
+              </div>
+            </div>
           <% } %>
         </div>
-        <script>
-          const removeFriendsButtons = document.querySelectorAll('.remove-friend');
-
-          removeFriendsButtons.forEach(button => {
-            button.addEventListener('click', async (event) => {
-              event.preventDefault();
-
-              const friendId = button.getAttribute('data-id');
-              try {
-                const response = await fetch("/reject-request", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                },
-                  body: JSON.stringify({ friendId }),
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                  alert("Friend removed successfully!");
-                  location.reload(); // Reload the page to update the friends list
-                } else {
-                  alert("Error removing friend: " + result.error);
-                }
-              } catch (error) {
-                console.error("Error:", error);
-                alert("An error occurred while removing the friend.");
-              }
-            });
-          });
-        </script>
       </div>
 
       <!-- Chat goes here -->

@@ -14,6 +14,14 @@ const userFriends = async (userId: number) => {
   return friends;
 };
 
+const friendRequests = async (userId: number) => {
+  const requests = await db.any(
+    `SELECT user_id, status FROM "userFriends" WHERE friend_id = $1 AND status = 'pending'`,
+    [userId],
+  );
+  return requests;
+};
+
 // Home page
 router.get("/", async (req, res) => {
   try {
@@ -27,12 +35,15 @@ router.get("/", async (req, res) => {
 
       const friends = await userFriends(req.session.userId);
       user.friends = friends;
+      const requests = await friendRequests(req.session.userId);
+      user.requests = requests;
     }
 
     res.render("root", {
       title: "Poker Game",
       user,
       friends: user ? user.friends : [],
+      requests: user ? user.requests : [],
     });
   } catch (error) {
     console.error("Home page error:", error);

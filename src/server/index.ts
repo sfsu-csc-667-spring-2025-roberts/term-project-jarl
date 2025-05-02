@@ -150,8 +150,7 @@ app.use("/test", testRouter);
 app.use("/auth", routes.auth);
 app.use("/chat", middleware.auth, routes.chat);
 app.use("/lobby", middleware.auth, routes.lobby);
-app.use("/send-request", middleware.auth, routes.request);
-app.use("/reject-request", middleware.auth, routes.reject);
+app.use("/friends", middleware.auth, routes.friends);
 
 app.use((_request, _response, next) => {
   next(httpErrors(404));

@@ -14,6 +14,7 @@
     "db:migrate1": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js up -j ts -d postgres --migration-file-language ts --migration-table pgmigrations --migration-schema public",
     "db:migrate": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js up -j ts -d postgres",
     "db:rollback": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js down -j ts -d postgres",
+    "build": "tsc src/client/js/friends.ts --outDir public/js",
     "lint": "prettier --write ./src"
   },
   "repository": {
@@ -60,7 +61,7 @@
     "prettier": "^3.5.3",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
