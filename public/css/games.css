@@ -1,0 +1,55 @@
+main {
+  display: grid;
+  padding: 0.75rem 5rem;
+}
+
+#game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#leave-game-btn {
+  background-color: rgb(221, 221, 221);
+  color: black;
+  border: 1px solid rgb(221, 221, 221);
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+}
+
+#leave-game-btn:hover {
+  background-color: rgba(150, 150, 150, 0.651);
+}
+
+#leave-game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#leave-game-container.hidden {
+  display: none;
+}
+
+#leave-game-modal {
+  background-color: rgb(166, 166, 166);
+  padding: 1rem 2rem;
+  width: 50%;
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+#leave-game-modal > form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#leave-game-modal > form > button {
+  background-color: rgb(221, 221, 221);
+  color: black;
+  border: 1px solid rgb(221, 221, 221);
+  border-radius: 0.5px;
+  padding: 0.5rem 1rem;
+}
