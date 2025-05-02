@@ -1,12 +1,14 @@
 import express from "express";
 import { Request, Response } from "express";
-import path from "path";
 
 const router = express.Router();
 
-router.get("/", (_request: Request, response: Response) => {
-  const fullPath = path.join(__dirname, "../../../views/realLobby.ejs");
-  response.render(fullPath);
+router.get("/", async (_request: Request, response: Response) => {
+  if (!_request.session.userId) {
+    return response.redirect("/signin");
+  }
+
+  response.render("realLobby");
 });
 
 export default router;

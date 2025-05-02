@@ -6,17 +6,33 @@ import db from "../db/connection";
 const router = express.Router();
 const userModel = new User(db);
 
+const userFriends = async (userId: number) => {
+  const friends = await db.any(
+    `SELECT friend_id, status FROM "userFriends" WHERE user_id = $1`,
+    [userId],
+  );
+  return friends;
+};
+
 // Home page
 router.get("/", async (req, res) => {
   try {
     let user = null;
     if (req.session.userId) {
       user = await userModel.findById(req.session.userId);
+
+      if (!user) {
+        return res.redirect("/signin");
+      }
+
+      const friends = await userFriends(req.session.userId);
+      user.friends = friends;
     }
 
     res.render("root", {
       title: "Poker Game",
       user,
+      friends: user ? user.friends : [],
     });
   } catch (error) {
     console.error("Home page error:", error);
@@ -67,16 +83,6 @@ router.get("/reset-password", (req, res) => {
     title: "Reset Password",
     token,
   });
-});
-
-router.get("/friends", (req, res) => {
-  console.log("Friends route accessed");
-  if (!req.session.userId) {
-    return res.redirect("/signin");
-  }
-  // Assuming you have a function to get friends from the database
-  const friends = ["John", "Clair", "Joe"]; // Replace with actual database call
-  res.render("friends", { friends: friends });
 });
 
 export default router;

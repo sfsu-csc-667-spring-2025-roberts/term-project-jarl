@@ -15,9 +15,22 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       notNull: true,
       references: '"users"',
     },
+    status: {
+      type: "varchar(50)",
+      notNull: true,
+      default: "'pending'",
+    },
+    created_at: {
+      type: "timestamp",
+      notNull: true,
+      default: pgm.func("current_timestamp"),
+    },
+  });
+  pgm.addConstraint("userFriends", "unique_user_friend", {
+    unique: ["user_id", "friend_id"],
   });
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropTable("userFriend");
+  pgm.dropTable("userFriends");
 }

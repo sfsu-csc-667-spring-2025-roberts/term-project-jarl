@@ -32,6 +32,8 @@ declare module "express-session" {
   }
 }
 import session from "express-session";
+import { setupFriendSocket } from "./socket/friends";
+setupFriendSocket(io);
 
 // Add a timeout to force exit if server hangs
 console.log("Starting server with safety timeout...");
@@ -148,7 +150,8 @@ app.use("/test", testRouter);
 app.use("/auth", routes.auth);
 app.use("/chat", middleware.auth, routes.chat);
 app.use("/lobby", middleware.auth, routes.lobby);
-app.use("/friends", middleware.auth, routes.friends);
+app.use("/send-request", middleware.auth, routes.request);
+app.use("/reject-request", middleware.auth, routes.reject);
 
 app.use((_request, _response, next) => {
   next(httpErrors(404));

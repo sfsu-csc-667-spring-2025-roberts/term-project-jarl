@@ -5,10 +5,6 @@ export const shorthands: ColumnDefinitions | undefined = undefined;
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable("games", {
     game_id: "id",
-    // max_num_players: {
-    //   type: "integer",
-    //   notNull: true,
-    // },
     name: {
       type: "varchar(255)",
     },
@@ -20,16 +16,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       type: "integer",
       notNull: true,
     },
-    // curr_pot_size: {
-    //   type: "float",
-    //   notNull: true,
-    //   default: 0,
-    // },
-    // buy_in: {
-    //   type: "float",
-    //   notNull: true,
-    //   default: 0,
-    // },
     password: {
       type: "varchar(255)",
       notNull: false,
