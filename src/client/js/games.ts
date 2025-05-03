@@ -7,8 +7,11 @@ prob delete that game_player_id, update state, and go back to lobby
 
 const leaveGameBtn =
   document.querySelector<HTMLButtonElement>("#leave-game-btn");
-const leaveGameContainer = document.querySelector("#leave-game-container");
-const leaveGameModal = document.querySelector("#leave-game-modal");
+const leaveGameContainer = document.querySelector<HTMLDivElement>(
+  "#leave-game-container",
+);
+const leaveGameModal =
+  document.querySelector<HTMLDivElement>("#leave-game-modal");
 const confirmLeaveBtn =
   document.querySelector<HTMLButtonElement>("#confirm-leave-btn");
 const cancelLeaveBtn =
@@ -16,11 +19,17 @@ const cancelLeaveBtn =
 
 leaveGameBtn!.addEventListener("click", (e) => {
   e.preventDefault();
-  // console.log("here")
   leaveGameContainer!.classList.toggle("hidden");
 });
 
 cancelLeaveBtn!.addEventListener("click", (e) => {
   e.preventDefault();
   leaveGameContainer!.classList.toggle("hidden");
+});
+
+leaveGameContainer!.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (e.target === leaveGameContainer) {
+    leaveGameContainer!.classList.toggle("hidden");
+  }
 });
