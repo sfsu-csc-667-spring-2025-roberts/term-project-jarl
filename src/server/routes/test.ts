@@ -5,9 +5,10 @@ import { Request, Response } from "express";
 import type { Server } from "socket.io";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { Game } from "../db";
+import GameModel from "../db/models/game";
 
 const router = express.Router();
+const gameModel = new GameModel(db);  // Create an instance of Game
 
 router.post("/test", async (req, res) => {
   try {
@@ -71,11 +72,13 @@ router.get("/games/create", async (request: Request, response: Response) => {
     request.body;
 
   try {
-    const gameId = await db.one(
-      "INSERT INTO games(name, min_players, max_players, password) VALUES ($1, $2, $3, $4) RETURNING game_id",
-      [gameName, gameMinPlayers, gameMaxPlayers, gamePassword],
+    const game = await gameModel.create(
+      gameName, 
+      gameMinPlayers, 
+      gameMaxPlayers, 
+      gamePassword
     );
-    response.json({ gameId });
+    response.json({ gameId: game.game_id });
   } catch (error) {
     console.error("error creating game: ", error);
     response.status(500).send("error creating game");
@@ -86,10 +89,11 @@ router.post("/games/join", async (request: Request, response: Response) => {
   const { gameId, userId, gamePassword } = request.body;
 
   try {
-    const playerCount = await Game.conditionalJoin(
-      gameId,
-      userId,
-      gamePassword,
+    // Use the gameModel instance instead of the Game class directly
+    const playerCount = await gameModel.conditionalJoin(
+      parseInt(gameId, 10),
+      parseInt(userId, 10),
+      gamePassword
     );
     response.json({ playerCount });
   } catch (error) {

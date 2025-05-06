@@ -1,41 +1,26 @@
 // src/server/middleware/auth.ts
-import express from "express";
-import User from "../db/models/user";
-import db from "../db/connection";
+import { Request, Response, NextFunction } from 'express';
 
-const userModel = new User(db);
-
-export const auth = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction,
-) => {
-  try {
-    const userId = req.session.userId;
-
-    if (!userId) {
-      res.status(401).json({ error: "Authentication required" });
-      return;
-    }
-
-    const user = await userModel.findById(userId);
-    if (!user) {
-      req.session.destroy(() => {});
-      res.status(401).json({ error: "Authentication required" });
-      return;
-    }
-
-    // Make user available in request
-    // this doesn't exist, and causes an error so I commented it out
-    // @ts-ignore
-    req.session.user = user;
-
-    next();
-  } catch (error) {
-    console.error("Auth middleware error:", error);
-    res.status(500).json({ error: "Internal server error" });
-    return;
+// Check if user is authenticated
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  // Type assertion for session
+  const session = req.session as any;
+  
+  if (session && session.userId) {
+    return next();
   }
+  
+  res.redirect('/signin');
 };
 
-export default auth;
+// Check if user is NOT authenticated
+export const isNotAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  // Type assertion for session
+  const session = req.session as any;
+  
+  if (session && session.userId) {
+    return res.redirect('/');
+  }
+  
+  next();
+};

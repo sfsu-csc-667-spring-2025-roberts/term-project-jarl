@@ -1,14 +1,17 @@
+// src/server/routes/request.ts
 import express from "express";
+import { Request, Response } from "express";
 import db from "../db/connection";
 
 const router = express.Router();
 const SEND_SQL = `INSERT INTO "userFriends" (user_id, friend_id, status) VALUES ($1, $2, 'pending')`;
 
 // send request to add a friend
-// @ts-ignore
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   console.log("Received request to send friend request:");
-  const userId = req.session.userId;
+  // Type assertion for session
+  const session = req.session as any;
+  const userId = session.userId;
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
@@ -25,7 +28,7 @@ router.post("/", async (req, res) => {
 
   try {
     // Check if a friend request already exists
-    const existingRequest = await db.query(
+    const existingRequest = await db.any(
       `SELECT * FROM "userFriends" WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
       [userId, friendId],
     );
@@ -39,7 +42,7 @@ router.post("/", async (req, res) => {
     }
 
     // Insert the friend request
-    await db.query(SEND_SQL, [userId, friendId]);
+    await db.none(SEND_SQL, [userId, friendId]);
     res.status(200).json({ message: "Friend request sent" });
   } catch (error) {
     console.error("Error sending friend request:", error);

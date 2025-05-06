@@ -1,4 +1,4 @@
-import type { ChatMessage } from "global";
+import type { ChatMessage } from "../../server/types/express-session";
 import { socket } from "../socket";
 
 const roomId = document.querySelector<HTMLInputElement>("input#room-id")?.value;

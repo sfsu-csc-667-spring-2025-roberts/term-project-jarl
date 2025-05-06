@@ -1,6 +1,6 @@
 import express from "express";
 import { Request, Response } from "express";
-import { ChatMessage } from "global";
+import { ChatMessage } from "../types/express-session";
 
 const router = express.Router();
 
@@ -11,10 +11,8 @@ router.post("/:roomId", (request: Request, response: Response) => {
 
   const broadcastMessage: ChatMessage = {
     message,
-    // @ts-ignore
-    sender: request.session.user.email,
-    // @ts-ignore
-    gravatar: request.session.user.gravatar,
+    sender: (request.session as any).user?.email || "Anonymous",
+    gravatar: (request.session as any).user?.gravatar,
     timestamp: Date.now(),
   };
 

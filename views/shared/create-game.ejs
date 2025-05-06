@@ -1,67 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Game</title>
 </head>
 <body>
-    <div id="create-game-container" class="hidden">
-        <form action="/games/create" method="POST">
-          <a href="#" id="hide-create-form">x</a>
-          <div>
-            <label for="game-name">Game Name:</label>
-            <input
-              type="text"
-              id="game-name"
-              name="gameName"
-              placeholder="Enter game name"
-            />
-          </div>
-          <!-- adjust form inputs and labels based on our own game table fields-->
-          <div>
-            <label for="game-min-players">Min Players:</label>
-            <input
-              type="number"
-              id="game-min-players"
-              name="gameMinPlayers"
-              min="2"
-              max="8"
-              value="2"
-            />
-          </div>
-    
-          <div>
-            <label for="game-max-players">Max Players:</label>
-            <input
-              type="number"
-              id="game-max-players"
-              name="gameMaxPlayers"
-              min="2"
-              max="8"
-              value="4"
-            />
-          </div>
-          <!-- <div>
-            <label for="game-buy-in">Buy in:</label>
-            <input
-              type="number"
-              id="game-buy-in"
-              name="gameBuyIn"
-              min="1"
-              required
-            /> -->
-          <div>
-            <label for="password">Password:</label>
-            <input
-              type="text"
-              id="gamePassword"
-              name="gamePassword"
-              placeholder="Enter password"
-            />
-          </div>
-          <button id="create-game-btn" type="submit" value="Create Game">Create Game</button>
-        </form>
+  <div id="create-game-container" class="hidden">
+    <form action="/games/create" method="POST">
+      <a href="#" id="hide-create-form">x</a>
+
+      <div>
+        <label for="game-name">Game Name:</label>
+        <input
+          type="text"
+          id="game-name"
+          name="gameName"
+          placeholder="Enter game name"
+          required
+        />
       </div>
+
+      <div>
+        <label for="game-min-players">Min Players:</label>
+        <input
+          type="number"
+          id="game-min-players"
+          name="minPlayers"
+          min="2"
+          max="8"
+          value="2"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="game-max-players">Max Players:</label>
+        <input
+          type="number"
+          id="game-max-players"
+          name="maxPlayers"
+          min="2"
+          max="8"
+          value="4"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="password">Password:</label>
+        <input
+          type="text"
+          id="gamePassword"
+          name="password"
+          placeholder="Enter password (optional)"
+        />
+      </div>
+
+      <button id="create-game-btn" type="submit" value="Create Game">
+        Create Game
+      </button>
+    </form>
+  </div>
 </body>
 </html>

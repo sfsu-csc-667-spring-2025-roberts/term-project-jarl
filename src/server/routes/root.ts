@@ -1,10 +1,13 @@
 // src/server/routes/root.ts
 import express from "express";
-import User from "../db/models/user";
+import { Request, Response } from "express";
 import db from "../db/connection";
+import UserModel from "../db/models/user";
+import GameModel from "../db/models/game";
 
 const router = express.Router();
-const userModel = new User(db);
+const userModel = new UserModel(db);
+const gameModel = new GameModel(db);
 
 const userFriends = async (userId: number) => {
   const friends = await db.any(
@@ -23,19 +26,27 @@ const friendRequests = async (userId: number) => {
 };
 
 // Home page
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     let user = null;
-    if (req.session.userId) {
-      user = await userModel.findById(req.session.userId);
+    // Use type assertion for req.session
+    const session = req.session as any;
+    
+    if (session && session.userId) {
+      // Convert userId to number if it's a string
+      const userId = typeof session.userId === 'string' 
+        ? parseInt(session.userId, 10) 
+        : session.userId;
+      
+      user = await userModel.findById(userId);
 
       if (!user) {
         return res.redirect("/signin");
       }
 
-      const friends = await userFriends(req.session.userId);
+      const friends = await userFriends(userId);
       user.friends = friends;
-      const requests = await friendRequests(req.session.userId);
+      const requests = await friendRequests(userId);
       user.requests = requests;
     }
 
@@ -55,34 +66,43 @@ router.get("/", async (req, res) => {
 });
 
 // Sign in page
-router.get("/signin", (req, res) => {
+router.get("/signin", (req: Request, res: Response) => {
   console.log("Signin route accessed");
-  if (req.session.userId) {
+  // Use type assertion for req.session
+  const session = req.session as any;
+  
+  if (session && session.userId) {
     return res.redirect("/");
   }
   res.render("signin", { title: "Sign In" });
 });
 
 // Sign up page
-router.get("/signup", (req, res) => {
+router.get("/signup", (req: Request, res: Response) => {
   console.log("Signup route accessed");
-  if (req.session.userId) {
+  // Use type assertion for req.session
+  const session = req.session as any;
+  
+  if (session && session.userId) {
     return res.redirect("/");
   }
   res.render("signup", { title: "Sign Up" });
 });
 
 // Forgot password page
-router.get("/forgot-password", (req, res) => {
+router.get("/forgot-password", (req: Request, res: Response) => {
   console.log("Forgot password route accessed");
-  if (req.session.userId) {
+  // Use type assertion for req.session
+  const session = req.session as any;
+  
+  if (session && session.userId) {
     return res.redirect("/");
   }
   res.render("forgot-password", { title: "Forgot Password" });
 });
 
 // Reset password page
-router.get("/reset-password", (req, res) => {
+router.get("/reset-password", (req: Request, res: Response) => {
   console.log("Reset password route accessed");
   const { token } = req.query;
 
