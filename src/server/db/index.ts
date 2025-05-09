@@ -1,7 +1,7 @@
 // src/server/db/index.ts
-import db from './connection';
-import UserModel from './models/user';
-import GameModel from './models/game';
+import db from "./connection";
+import UserModel from "./models/user";
+import GameModel from "./models/game";
 
 // Initialize models with the database connection
 const userModel = new UserModel(db);

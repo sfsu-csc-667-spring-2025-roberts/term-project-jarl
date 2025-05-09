@@ -16,13 +16,14 @@ router.get("/", async (req: Request, res: Response) => {
     let user = null;
     // Use type assertion for req.session
     const session = req.session as any;
-    
+
     if (session && session.userId) {
       // Convert userId to number if it's a string
-      const userId = typeof session.userId === 'string' 
-        ? parseInt(session.userId, 10) 
-        : session.userId;
-      
+      const userId =
+        typeof session.userId === "string"
+          ? parseInt(session.userId, 10)
+          : session.userId;
+
       user = await userModel.findById(userId);
 
       if (!user) {
@@ -30,7 +31,7 @@ router.get("/", async (req: Request, res: Response) => {
       }
 
       // Fetch friends and friend requests
-      const friendsDB = new friendsModel(db)
+      const friendsDB = new friendsModel(db);
 
       const friends = await friendsDB.getFriends(userId);
       user.friends = friends;
@@ -58,7 +59,7 @@ router.get("/signin", (req: Request, res: Response) => {
   console.log("Signin route accessed");
   // Use type assertion for req.session
   const session = req.session as any;
-  
+
   if (session && session.userId) {
     return res.redirect("/");
   }
@@ -70,7 +71,7 @@ router.get("/signup", (req: Request, res: Response) => {
   console.log("Signup route accessed");
   // Use type assertion for req.session
   const session = req.session as any;
-  
+
   if (session && session.userId) {
     return res.redirect("/");
   }
@@ -82,7 +83,7 @@ router.get("/forgot-password", (req: Request, res: Response) => {
   console.log("Forgot password route accessed");
   // Use type assertion for req.session
   const session = req.session as any;
-  
+
   if (session && session.userId) {
     return res.redirect("/");
   }

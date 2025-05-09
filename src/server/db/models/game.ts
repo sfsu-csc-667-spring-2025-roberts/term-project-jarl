@@ -8,30 +8,30 @@ class Game {
     this.db = db;
   }
 
-  async create(name: string, minPlayers: number, maxPlayers: number, password?: string) {
+  async create(
+    name: string,
+    minPlayers: number,
+    maxPlayers: number,
+    password?: string,
+  ) {
     return this.db.one(
       "INSERT INTO games(name, min_players, max_players, password) VALUES($1, $2, $3, $4) RETURNING game_id",
-      [name, minPlayers, maxPlayers, password]
+      [name, minPlayers, maxPlayers, password],
     );
   }
 
   async findById(id: number) {
-    return this.db.oneOrNone(
-      "SELECT * FROM games WHERE game_id = $1",
-      [id]
-    );
+    return this.db.oneOrNone("SELECT * FROM games WHERE game_id = $1", [id]);
   }
 
   async getActiveGames() {
-    return this.db.any(
-      "SELECT * FROM games WHERE is_active = true"
-    );
+    return this.db.any("SELECT * FROM games WHERE is_active = true");
   }
 
   async joinGame(gameId: number, userId: number, isHost: boolean = false) {
     return this.db.none(
       "INSERT INTO game_players(game_id, user_id, is_host) VALUES($1, $2, $3)",
-      [gameId, userId, isHost]
+      [gameId, userId, isHost],
     );
   }
 
@@ -64,7 +64,7 @@ class Game {
       const result = await this.db.one(CONDITIONAL_JOIN_SQL, {
         gameId,
         userId,
-        password
+        password,
       });
       return result.player_count;
     } catch (error) {
@@ -76,7 +76,7 @@ class Game {
   async getPlayerCount(gameId: number) {
     const { count } = await this.db.one(
       "SELECT COUNT(*) FROM game_players WHERE game_id = $1",
-      [gameId]
+      [gameId],
     );
     return count;
   }
@@ -87,7 +87,7 @@ class Game {
        FROM game_players gp
        JOIN users u ON gp.user_id = u.user_id
        WHERE gp.game_id = $1`,
-      [gameId]
+      [gameId],
     );
   }
 }

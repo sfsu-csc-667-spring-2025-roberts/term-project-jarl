@@ -73,9 +73,7 @@ router.post("/signin", async (req: Request, res: Response) => {
 
     // Validate inputs
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "Email and password are required" });
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
     // Find user
@@ -93,7 +91,7 @@ router.post("/signin", async (req: Request, res: Response) => {
     // Set user in session (using type assertion)
     (req.session as any).user = user;
     (req.session as any).userId = user.user_id;
-    
+
     req.session.save((err) => {
       if (err) {
         console.error("Error saving session:", err);
@@ -181,9 +179,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
     const { token, password } = req.body;
 
     if (!token || !password) {
-      return res
-        .status(400)
-        .json({ error: "Token and password are required" });
+      return res.status(400).json({ error: "Token and password are required" });
     }
 
     if (!validatePassword(password)) {
@@ -230,8 +226,9 @@ router.get("/me", async (req: Request, res: Response) => {
     }
 
     // Convert userId to number if it's a string
-    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    
+    const userIdNum =
+      typeof userId === "string" ? parseInt(userId, 10) : userId;
+
     const user = await userModel.findById(userIdNum);
     if (!user) {
       req.session.destroy(() => {});

@@ -13,11 +13,15 @@ router.post("/send", async (req: Request, res: Response) => {
   let { friendId } = req.body;
 
   if (!userId || !friendId) {
-    return res.status(400).json({ error: "User ID and Friend ID are required" });
+    return res
+      .status(400)
+      .json({ error: "User ID and Friend ID are required" });
   }
 
   if (userId.toString() === friendId) {
-    return res.status(400).json({ error: "You cannot send a friend request to yourself" });
+    return res
+      .status(400)
+      .json({ error: "You cannot send a friend request to yourself" });
   }
 
   try {
@@ -50,17 +54,22 @@ router.post("/reject", async (req: Request, res: Response) => {
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
-    return res.status(400).json({ error: "User ID and Friend ID are required" });
+    return res
+      .status(400)
+      .json({ error: "User ID and Friend ID are required" });
   }
 
   try {
     const friends = new friendsModel(db);
 
-    const existingRequest = await friends.existingRequests(userId, Number(friendId));
-    if (existingRequest.length === 0) { 
+    const existingRequest = await friends.existingRequests(
+      userId,
+      Number(friendId),
+    );
+    if (existingRequest.length === 0) {
       return res.status(400).json({ error: "No friend request found" });
     }
-    
+
     await friends.deleteFriendRequest(userId, Number(friendId));
     await friends.deleteFriendRequest(Number(friendId), userId);
 
@@ -79,14 +88,19 @@ router.post("/accept", async (req: Request, res: Response) => {
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
-    return res.status(400).json({ error: "User ID and Friend ID are required" });
+    return res
+      .status(400)
+      .json({ error: "User ID and Friend ID are required" });
   }
 
   try {
     const friends = new friendsModel(db);
 
-    const existingRequest = await friends.existingRequests(userId, Number(friendId));
-    if (existingRequest.length === 0) { 
+    const existingRequest = await friends.existingRequests(
+      userId,
+      Number(friendId),
+    );
+    if (existingRequest.length === 0) {
       return res.status(400).json({ error: "No friend request found" });
     }
 
@@ -111,14 +125,19 @@ router.post("/remove", async (req: Request, res: Response) => {
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
-    return res.status(400).json({ error: "User ID and Friend ID are required" });
+    return res
+      .status(400)
+      .json({ error: "User ID and Friend ID are required" });
   }
 
   try {
     const friends = new friendsModel(db);
 
-    const existingRequest = await friends.existingRequests(userId, Number(friendId));
-    if (existingRequest.length === 0) { 
+    const existingRequest = await friends.existingRequests(
+      userId,
+      Number(friendId),
+    );
+    if (existingRequest.length === 0) {
       return res.status(400).json({ error: "No friend request found" });
     }
 

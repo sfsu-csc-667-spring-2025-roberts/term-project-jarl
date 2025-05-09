@@ -39,7 +39,7 @@
 // export default { register, login };
 // File: src/server/db/users/index.ts
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IUser extends Document {
   username: string;
@@ -51,17 +51,20 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-const userSchema = new Schema<IUser>({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  gravatar: { type: String },
-  chips: { type: Number, default: 1000 },
-}, {
-  timestamps: true
-});
+const userSchema = new Schema<IUser>(
+  {
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    gravatar: { type: String },
+    chips: { type: Number, default: 1000 },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-export const UserModel = mongoose.model<IUser>('User', userSchema);
+export const UserModel = mongoose.model<IUser>("User", userSchema);
 
 export const createUser = async (userData: Partial<IUser>) => {
   const user = new UserModel(userData);

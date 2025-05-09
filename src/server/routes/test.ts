@@ -8,7 +8,7 @@ import crypto from "crypto";
 import GameModel from "../db/models/game";
 
 const router = express.Router();
-const gameModel = new GameModel(db);  // Create an instance of Game
+const gameModel = new GameModel(db); // Create an instance of Game
 
 router.post("/test", async (req, res) => {
   try {
@@ -73,10 +73,10 @@ router.get("/games/create", async (request: Request, response: Response) => {
 
   try {
     const game = await gameModel.create(
-      gameName, 
-      gameMinPlayers, 
-      gameMaxPlayers, 
-      gamePassword
+      gameName,
+      gameMinPlayers,
+      gameMaxPlayers,
+      gamePassword,
     );
     response.json({ gameId: game.game_id });
   } catch (error) {
@@ -93,7 +93,7 @@ router.post("/games/join", async (request: Request, response: Response) => {
     const playerCount = await gameModel.conditionalJoin(
       parseInt(gameId, 10),
       parseInt(userId, 10),
-      gamePassword
+      gamePassword,
     );
     response.json({ playerCount });
   } catch (error) {
