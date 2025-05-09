@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import path from "path";
 import webpack from "webpack";
+import { friends } from "./src/server/routes";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const config: webpack.Configuration = {
     main: path.join(process.cwd(), "src", "client", "index.ts"),
     lobby: path.join(process.cwd(), "src", "client", "js", "lobby.ts"),
     games: path.join(process.cwd(), "src", "client", "js", "games.ts"),
+    friends: path.join(process.cwd(), "src", "client", "js", "friends.ts"),
   },
   output: {
     path: path.join(process.cwd(), "public", "js"),

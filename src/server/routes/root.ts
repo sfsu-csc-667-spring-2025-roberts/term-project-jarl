@@ -4,26 +4,11 @@ import { Request, Response } from "express";
 import db from "../db/connection";
 import UserModel from "../db/models/user";
 import GameModel from "../db/models/game";
+import friendsModel from "../db/models/friends";
 
 const router = express.Router();
 const userModel = new UserModel(db);
 const gameModel = new GameModel(db);
-
-const userFriends = async (userId: number) => {
-  const friends = await db.any(
-    `SELECT friend_id, status FROM "userFriends" WHERE user_id = $1`,
-    [userId],
-  );
-  return friends;
-};
-
-const friendRequests = async (userId: number) => {
-  const requests = await db.any(
-    `SELECT user_id, status FROM "userFriends" WHERE friend_id = $1 AND status = 'pending'`,
-    [userId],
-  );
-  return requests;
-};
 
 // Home page
 router.get("/", async (req: Request, res: Response) => {
@@ -44,9 +29,12 @@ router.get("/", async (req: Request, res: Response) => {
         return res.redirect("/signin");
       }
 
-      const friends = await userFriends(userId);
+      // Fetch friends and friend requests
+      const friendsDB = new friendsModel(db)
+
+      const friends = await friendsDB.getFriends(userId);
       user.friends = friends;
-      const requests = await friendRequests(userId);
+      const requests = await friendsDB.getFriendRequests(userId);
       user.requests = requests;
     }
 

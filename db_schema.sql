@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS game_states (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Friends table (using "userFriends" as table name to match your existing code)
+-- Friends table (using "userFriends" as table name to match existing code)
 CREATE TABLE IF NOT EXISTS "userFriends" (
     friendship_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
