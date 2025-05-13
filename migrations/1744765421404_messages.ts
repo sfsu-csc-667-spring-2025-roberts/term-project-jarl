@@ -1,37 +1,20 @@
-import { ColumnDefinitions, MigrationBuilder } from "node-pg-migrate";
+import { IDatabase } from 'pg-promise';
 
-export const shorthands: ColumnDefinitions | undefined = undefined;
-
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.createTable("messages", {
-    message_id: "id",
-    content: {
-      type: "text",
-      notNull: true,
-    },
-    author: {
-      type: "integer",
-      notNull: true,
-      references: '"users"',
-    },
-    created_at: {
-      type: "timestamp",
-      notNull: true,
-      default: pgm.func("current_timestamp"),
-    },
-    isLobby: {
-      type: "boolean",
-      notNull: true,
-      default: false,
-    },
-    game_player_id: {
-      type: "integer",
-      notNull: true,
-      references: '"gamePlayers"',
-    },
-  });
+export async function up(db: IDatabase<{}>) {
+  await db.none(`
+    CREATE TABLE messages (
+      message_id SERIAL PRIMARY KEY,
+      content TEXT NOT NULL,
+      author INTEGER NOT NULL REFERENCES users(id),
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      isLobby BOOLEAN NOT NULL DEFAULT false,
+      game_player_id INTEGER NOT NULL REFERENCES gamePlayers(game_player_id)
+    );
+  `);
 }
 
-export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropTable("messages");
+export async function down(db: IDatabase<{}>) {
+  await db.none(`
+    DROP TABLE messages;
+  `);
 }

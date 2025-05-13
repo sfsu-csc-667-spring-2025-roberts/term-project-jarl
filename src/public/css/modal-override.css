@@ -1,0 +1,39 @@
+/* modal-override.css - Override Bootstrap modal styles to prevent freezing */
+
+/* Ensure modals are properly layered */
+.modal {
+  z-index: 1055 !important;
+}
+
+.modal-backdrop {
+  z-index: 1050 !important;
+}
+
+/* Prevent double-clicking issues */
+.modal-dialog {
+  pointer-events: all !important;
+}
+
+/* Fix for Bootstrap 5 modal centering */
+.modal-dialog {
+  margin: 1.75rem auto !important;
+}
+
+/* Ensure modals are properly displayed */
+.modal.show {
+  display: block !important;
+}
+
+/* Fix for any z-index conflicts */
+#create-game-modal,
+#add-funds-modal,
+#join-game-modal {
+  z-index: 1055 !important;
+}
+
+/* Ensure form elements are clickable */
+.modal-body .form-control,
+.modal-body .form-select,
+.modal-body .btn {
+  pointer-events: all !important;
+}

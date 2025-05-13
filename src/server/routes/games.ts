@@ -1,290 +1,166 @@
 // src/server/routes/games.ts
 import express from "express";
-import { Request, Response } from "express";
-import db from "../db/connection";
-import GameModel from "../db/models/game";
 import { isAuthenticated } from "../middleware/auth";
+import games from "../db/games";
+import { GameState, Game } from "../db/models/game";
 
 const router = express.Router();
-const gameModel = new GameModel(db);
 
 // Get all active games
-router.get('/', isAuthenticated, async (req: Request, res: Response) => {
+router.get("/", isAuthenticated, async (req, res) => {
   try {
-    const games = await gameModel.getActiveGames();
-    res.json(games);
+    const activeGames = await games.findActiveGames();
+    res.render("lobby", { games: activeGames, user: req.session.user });
   } catch (error) {
-    console.error('Error fetching games:', error);
-    res.status(500).json({ error: 'Failed to fetch games' });
+    console.error("Error fetching games:", error);
+    res.status(500).render("error", { message: "Error loading games" });
   }
 });
 
 // Create a new game
-router.post('/create', isAuthenticated, async (req: Request, res: Response) => {
+router.post("/create", isAuthenticated, async (req, res) => {
   try {
-    const { name, minPlayers, maxPlayers, password } = req.body;
-    // Type assertion for session
-    const session = req.session as any;
-    const userId = session.userId;
+    console.log("Create game request:", req.body);
     
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
+    // Extract data - check both JSON and form data formats
+    let name, maxPlayers, minBuyIn, isPrivate;
+    
+    if (typeof req.body === 'object') {
+      // Handle both naming conventions
+      name = req.body.name || req.body.gameName;
+      maxPlayers = req.body.maxPlayers || req.body.max_players;
+      minBuyIn = req.body.minBuyIn || req.body.min_buy_in;
+      isPrivate = req.body.private || req.body['private-game'] === 'on';
     }
     
-    if (!name) {
-      return res.status(400).json({ error: 'Game name is required' });
-    }
-    
-    // Create the game
-    const game = await gameModel.create(
-      name,
-      parseInt(minPlayers || '2', 10),
-      parseInt(maxPlayers || '6', 10),
-      password
-    );
-    
-    // Convert userId to number if it's a string
-    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    
-    // Join the creator to the game as host
-    await gameModel.joinGame(game.game_id, userIdNum, true);
-    
-    // Notify clients via socket if needed
-    const io = req.app.get('io');
-    if (io) {
-      io.emit('game:created', {
-        gameId: game.game_id,
-        name: game.name,
-        minPlayers: game.min_players,
-        maxPlayers: game.max_players,
-        hasPassword: !!game.password,
-        createdBy: userId
+    if (!name || !maxPlayers) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing required fields" 
       });
     }
     
-    res.status(201).json(game);
-  } catch (error) {
-    console.error('Error creating game:', error);
-    res.status(500).json({ error: 'Failed to create game' });
-  }
-});
-
-// Start a game
-router.post('/:gameId/start', isAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const { gameId } = req.params;
-    // Type assertion for session
-    const session = req.session as any;
-    const userId = session.userId;
+    const parsedMaxPlayers = parseInt(maxPlayers);
     
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-    
-    if (!gameId) {
-      return res.status(400).json({ error: 'Game ID is required' });
-    }
-    
-    // Convert userId to number if it's a string
-    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    
-    // Check if the game exists and if the user is the host
-    const game = await gameModel.findById(parseInt(gameId, 10));
-    
-    if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
-    }
-    
-    // Check if the player is in the game and is host
-    const players = await gameModel.getGamePlayers(parseInt(gameId, 10));
-    const player = players.find((p: any) => p.user_id === userIdNum);
-    
-    if (!player) {
-      return res.status(403).json({ error: 'You are not in this game' });
-    }
-    
-    if (!player.is_host) {
-      return res.status(403).json({ error: 'Only the host can start the game' });
-    }
-    
-    // Check if enough players
-    if (players.length < 2) {
-      return res.status(400).json({ error: 'Need at least 2 players to start the game' });
-    }
-    
-    // Update the game state
-    await db.none(`
-      UPDATE games 
-      SET is_started = true, 
-          round = 'pre-flop', 
-          current_turn = $1,
-          start_time = CURRENT_TIMESTAMP
-      WHERE game_id = $2
-    `, [players[0].user_id, parseInt(gameId, 10)]);
-    
-    // Emit socket event to notify all players
-    const io = req.app.get('io');
-    if (io) {
-      io.to(`game-${gameId}`).emit('game:started', {
-        gameId,
-        startedBy: userId
+    if (isNaN(parsedMaxPlayers) || parsedMaxPlayers < 2 || parsedMaxPlayers > 8) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid player count (2-8)" 
       });
     }
     
-    res.json({ success: true, message: 'Game started successfully' });
-  } catch (error) {
-    console.error('Error starting game:', error);
-    res.status(500).json({ error: 'Failed to start game' });
-  }
-});
-
-// Join a game
-router.post('/:gameId/join', isAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const { gameId } = req.params;
-    const { password } = req.body;
-    // Type assertion for session
-    const session = req.session as any;
-    const userId = session.userId;
+    // Use timeout for the database operation
+    const result = await Promise.race([
+      games.create(name, parsedMaxPlayers, req.session.user.id),
+      new Promise<Game>((_, reject) => 
+        setTimeout(() => reject(new Error('Game creation timeout')), 5000)
+      )
+    ]);
     
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+    // Check if the request expects JSON (AJAX call) or a redirect
+    const isAjax = req.xhr || req.headers.accept?.includes('application/json');
     
-    if (!gameId) {
-      return res.status(400).json({ error: 'Game ID is required' });
-    }
-    
-    const gameIdNum = parseInt(gameId, 10);
-    // Convert userId to number if it's a string
-    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    
-    // Attempt to join the game
-    const playerCount = await gameModel.conditionalJoin(gameIdNum, userIdNum, password || '');
-    
-    // Emit socket event
-    const io = req.app.get('io');
-    if (io) {
-      io.to(`game-${gameId}`).emit('player:joined', {
-        gameId,
-        playerId: userId,
-        playerCount
-      });
-    }
-    
-    res.json({ success: true, playerCount });
-  } catch (error) {
-    console.error('Error joining game:', error);
-    res.status(500).json({ error: 'Failed to join game. Check if the game is full, already started, or if you need a password.' });
-  }
-});
-
-// Leave a game
-router.post('/:gameId/leave', isAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const { gameId } = req.params;
-    // Type assertion for session
-    const session = req.session as any;
-    const userId = session.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-    
-    if (!gameId) {
-      return res.status(400).json({ error: 'Game ID is required' });
-    }
-    
-    const gameIdNum = parseInt(gameId, 10);
-    // Convert userId to number if it's a string
-    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    
-    // Check if the game exists
-    const game = await gameModel.findById(gameIdNum);
-    
-    if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
-    }
-    
-    // Check if the game has started
-    if (game.is_started) {
-      return res.status(400).json({ error: 'Cannot leave a game that has already started' });
-    }
-    
-    // Check if the player is in the game
-    const players = await gameModel.getGamePlayers(gameIdNum);
-    const player = players.find((p: any) => p.user_id === userIdNum);
-    
-    if (!player) {
-      return res.status(400).json({ error: 'You are not in this game' });
-    }
-    
-    // If the player is the host, delete the game
-    if (player.is_host) {
-      await db.none('UPDATE games SET is_active = false WHERE game_id = $1', [gameIdNum]);
-      
-      // Notify all players
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`game-${gameId}`).emit('game:deleted', {
-          gameId,
-          reason: 'Host left the game'
-        });
-      }
-      
-      res.json({ success: true, message: 'Game deleted successfully' });
+    if (isAjax) {
+      return res.json({ success: true, game_id: result.id });
     } else {
-      // Just remove the player
-      await db.none('DELETE FROM game_players WHERE game_id = $1 AND user_id = $2', [gameIdNum, userIdNum]);
-      
-      // Emit socket event
-      const io = req.app.get('io');
-      if (io) {
-        io.to(`game-${gameId}`).emit('player:left', {
-          gameId,
-          playerId: userId
-        });
-      }
-      
-      res.json({ success: true, message: 'Left the game successfully' });
+      return res.redirect(`/games/${result.id}`);
     }
   } catch (error) {
-    console.error('Error leaving game:', error);
-    res.status(500).json({ error: 'Failed to leave game' });
+    console.error("Error creating game:", error);
+    
+    // Handle error based on request type
+    const isAjax = req.xhr || req.headers.accept?.includes('application/json');
+    
+    const errorMessage = error.message === 'Game creation timeout' 
+      ? "Game creation is taking too long. Please try again." 
+      : "Server error while creating game";
+    
+    if (isAjax) {
+      return res.status(500).json({ 
+        success: false, 
+        message: errorMessage 
+      });
+    } else {
+      return res.status(500).render("error", { message: errorMessage });
+    }
   }
 });
 
-// Get a specific game
-router.get('/:gameId', isAuthenticated, async (req: Request, res: Response) => {
+// Join a specific game
+router.get("/:id", isAuthenticated, async (req, res) => {
   try {
-    const { gameId } = req.params;
+    const gameId = parseInt(req.params.id);
     
-    if (!gameId) {
-      return res.status(400).json({ error: 'Game ID is required' });
+    if (isNaN(gameId)) {
+      return res.status(400).render("error", { message: "Invalid game ID" });
     }
     
-    const gameIdNum = parseInt(gameId, 10);
-    
-    // Get the game details
-    const game = await gameModel.findById(gameIdNum);
+    // Use timeout for the database operation
+    const game = await Promise.race([
+      games.findById(gameId),
+      new Promise<Game | null>((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timeout')), 3000)
+      )
+    ]);
     
     if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
+      return res.status(404).render("error", { message: "Game not found" });
     }
     
-    // Get the players in the game
-    const players = await gameModel.getGamePlayers(gameIdNum);
+    if (game.state === GameState.FINISHED) {
+      return res.redirect("/");
+    }
     
-    // Add players to the game object
-    const gameWithPlayers = {
-      ...game,
-      players
-    };
-    
-    res.json(gameWithPlayers);
+    res.render("games", { game, user: req.session.user });
   } catch (error) {
-    console.error('Error fetching game:', error);
-    res.status(500).json({ error: 'Failed to fetch game' });
+    console.error("Error joining game:", error);
+    
+    const errorMessage = error.message === 'Database query timeout' 
+      ? "Loading game is taking too long. Please try again." 
+      : "Error loading game";
+    
+    res.status(500).render("error", { message: errorMessage });
+  }
+});
+
+// Leave a game (new endpoint for explicit leaving via HTTP)
+router.post("/:id/leave", isAuthenticated, async (req, res) => {
+  try {
+    const gameId = parseInt(req.params.id);
+    const userId = req.session.user.id;
+    
+    if (isNaN(gameId)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid game ID" 
+      });
+    }
+    
+    // Remove player from game
+    await games.removePlayer(gameId, userId);
+    
+    // Check if request expects JSON
+    const isAjax = req.xhr || req.headers.accept?.includes('application/json');
+    
+    if (isAjax) {
+      return res.json({ success: true });
+    } else {
+      return res.redirect("/");
+    }
+  } catch (error) {
+    console.error("Error leaving game:", error);
+    
+    // Check if request expects JSON
+    const isAjax = req.xhr || req.headers.accept?.includes('application/json');
+    
+    if (isAjax) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Error leaving game" 
+      });
+    } else {
+      return res.status(500).render("error", { message: "Error leaving game" });
+    }
   }
 });
 

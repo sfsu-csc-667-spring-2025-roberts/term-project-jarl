@@ -1,0 +1,26 @@
+// src/server/routes/test.ts - Fixed version
+import express from "express";
+import { isAuthenticated } from "../middleware/auth";
+import db from "../db/connection";
+import pgp from "pg-promise";
+import Game from "../db/models/game"; // Keep the import as is
+import games from "../db/games"; // Add this import
+import { GameState } from "../db/models/game"; // Import GameState directly
+
+const router = express.Router();
+
+// Your test routes...
+
+// In your code, replace any instances of Game.create with games.create
+// For example:
+// const result = await Game.create(name, maxPlayers, userId);
+// Should be changed to:
+// const result = await games.create(name, maxPlayers, userId);
+
+// And replace any instances of Game.addPlayer with games.addPlayer
+// For example:
+// await Game.addPlayer(gameId, userId);
+// Should be changed to:
+// await games.addPlayer(gameId, userId);
+
+export default router;

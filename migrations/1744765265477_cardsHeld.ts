@@ -1,23 +1,17 @@
-import { ColumnDefinitions, MigrationBuilder } from "node-pg-migrate";
+import { IDatabase } from 'pg-promise';
 
-export const shorthands: ColumnDefinitions | undefined = undefined;
-
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.createTable("cardsHeld", {
-    card_held_id: "id",
-    game_player_id: {
-      type: "integer",
-      notNull: true,
-      references: '"gamePlayers"',
-    },
-    card_id: {
-      type: "integer",
-      notNull: true,
-      references: '"cards"',
-    },
-  });
+export async function up(db: IDatabase<{}>) {
+  await db.none(`
+    CREATE TABLE cardsHeld (
+      card_held_id SERIAL PRIMARY KEY,
+      game_player_id INTEGER NOT NULL REFERENCES gamePlayers(game_player_id),
+      card_id INTEGER NOT NULL REFERENCES cards(card_id)
+    );
+  `);
 }
 
-export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropTable("cardsHeld");
+export async function down(db: IDatabase<{}>) {
+  await db.none(`
+    DROP TABLE cardsHeld;
+  `);
 }

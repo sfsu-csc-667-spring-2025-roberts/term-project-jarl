@@ -1,0 +1,1 @@
+{"version":3,"file":"time.js","sourceRoot":"","sources":["../../../../src/server/middleware/time.ts"],"names":[],"mappings":";;;AAGA,MAAM,cAAc,GAAG,CACrB,QAAiB,EACjB,SAAmB,EACnB,IAAkB,EAClB,EAAE;IACF,OAAO,CAAC,GAAG,CAAC,mBAAmB,IAAI,IAAI,EAAE,CAAC,WAAW,EAAE,EAAE,CAAC,CAAC;IAE3D,IAAI,EAAE,CAAC;AACT,CAAC,CAAC;AAEO,wCAAc"}

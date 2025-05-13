@@ -7,7 +7,6 @@ import GameModel from "../db/models/game";
 
 const router = express.Router();
 const userModel = new UserModel(db);
-const gameModel = new GameModel(db);
 
 const userFriends = async (userId: number) => {
   const friends = await db.any(

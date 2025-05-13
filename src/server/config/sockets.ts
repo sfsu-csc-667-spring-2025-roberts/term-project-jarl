@@ -1,27 +1,17 @@
-import type { Express } from "express";
-import type { Server } from "socket.io";
-import { sessionMiddleware } from "./session";
+// src/server/config/sockets.ts
+import { Server } from 'socket.io';
+import { setupSockets } from '../socket';
 
-const configureSockets = (io: Server, app: Express) => {
-  app.set("io", io);
+// Export the setupSocketHandlers function that just calls setupSockets
+export const setupSocketHandlers = (io: Server) => {
+  console.log("Using setupSocketHandlers from config/sockets.ts");
+  return setupSockets(io);
+};
 
-  io.engine.use(sessionMiddleware);
-
-  io.on("connection", (socket) => {
-    // @ts-ignore
-    const { id, user } = socket.request.session;
-
-    console.log(
-      `User [${user.id}] connected: ${user.email} with session id ${id}`,
-    );
-    socket.join(user.id);
-
-    socket.on("disconnect", () => {
-      console.log(
-        `User [${user.id}] disconnected: ${user.email} with session id ${id}`,
-      );
-    });
-  });
+// Provide a default export for backward compatibility
+const configureSockets = (io: Server) => {
+  console.log("Using configureSockets from config/sockets.ts");
+  return setupSockets(io);
 };
 
 export default configureSockets;

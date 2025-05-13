@@ -1,37 +1,45 @@
 // src/server/socket/index.ts
-import { Server as HttpServer } from 'http';
-import { Server as SocketServer } from 'socket.io';
-import { setupFriendSocket } from './friends';
+import { Server, Socket } from 'socket.io';
+import { setupChatHandlers } from './chat';
+import { setupGamesHandlers } from './games';
+import { setupFriendsHandlers } from './friends';
 
-const setupSocketServer = (server: HttpServer): SocketServer => {
-  const io = new SocketServer(server);
-  
-  // Handle connection
-  io.on('connection', (socket) => {
-    console.log(`Client connected: ${socket.id}`);
+// The main setupSockets function needs to be exported properly
+export function setupSockets(io: Server): void {
+  console.log('Setting up socket.io handlers');
+
+  // Handle new connections
+  io.on('connection', (socket: Socket) => {
+    console.log(`New client connected: ${socket.id}`);
     
-    // Join a game room
-    socket.on('join-game', (gameId) => {
-      socket.join(`game-${gameId}`);
-      console.log(`Socket ${socket.id} joined game room: ${gameId}`);
-    });
+    // Log authentication info for debugging
+    console.log('Socket handshake auth:', socket.handshake.auth);
+    console.log('Socket handshake query:', socket.handshake.query);
     
-    // Leave a game room
-    socket.on('leave-game', (gameId) => {
-      socket.leave(`game-${gameId}`);
-      console.log(`Socket ${socket.id} left game room: ${gameId}`);
-    });
+    // Get user ID from auth object
+    const userId = socket.handshake.auth.user_id;
     
-    // Handle disconnect
-    socket.on('disconnect', () => {
-      console.log(`Client disconnected: ${socket.id}`);
+    if (!userId) {
+      console.error('No user ID provided in socket auth');
+      socket.disconnect();
+      return;
+    }
+    
+    console.log(`User connected with ID: ${userId}`);
+    
+    // Set up specific handlers for different functionality
+    // Modify these calls to match the function signatures
+    setupChatHandlers(socket, userId);
+    setupGamesHandlers(socket, userId);
+    setupFriendsHandlers(socket, userId);
+    
+    // Handle disconnection
+    socket.on('disconnect', (reason) => {
+      console.log(`User ${userId} disconnected, cleaning up game sessions`);
+      console.log(`Client disconnected: ${socket.id}, reason: ${reason}`);
     });
   });
-  
-  // Setup friend socket functionality
-  setupFriendSocket(io);
-  
-  return io;
-};
+}
 
-export default setupSocketServer;
+// Export default as well for backward compatibility
+export default setupSockets;

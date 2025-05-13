@@ -1,14 +1,17 @@
-import { NextFunction, Request, Response } from "express";
+// src/server/middleware/time.ts
+import { Request, Response, NextFunction } from 'express';
 
-// example of a middleware function that will be used for user requests
-const timeMiddleware = (
-  _request: Request,
-  _response: Response,
-  next: NextFunction,
-) => {
-  console.log(`Request made at ${new Date().toISOString()}`);
-
+/**
+ * Middleware to log request timestamp
+ */
+export const timeMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const timestamp = new Date().toISOString();
+  console.log(`Request made at ${timestamp}`);
   next();
 };
 
-export { timeMiddleware };
+// For backward compatibility
+export const setupTimeMiddleware = (app: any) => {
+  app.use(timeMiddleware);
+  return timeMiddleware;
+};

@@ -1,0 +1,35 @@
+-- Fix database tables migration
+-- File: migrations/1746000000000_fix_tables.sql
+
+-- Ensure balance column exists and has default value
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS balance NUMERIC(10,2) DEFAULT 0;
+
+-- Ensure transactions table exists
+CREATE TABLE IF NOT EXISTS transactions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount NUMERIC(10,2) NOT NULL,
+  type VARCHAR(20) NOT NULL CHECK (type IN ('deposit', 'withdrawal')),
+  payment_method VARCHAR(50),
+  status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'completed', 'failed', 'cancelled')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_game_players_game_id ON game_players(game_id);
+CREATE INDEX IF NOT EXISTS idx_game_players_user_id ON game_players(user_id);
+
+-- Add constraints for better data integrity
+ALTER TABLE games 
+ALTER COLUMN state TYPE VARCHAR(20),
+ADD CONSTRAINT check_game_state CHECK (state IN ('WAITING', 'ACTIVE', 'FINISHED'));
+
+-- Fix any existing invalid data
+UPDATE users SET balance = 0 WHERE balance IS NULL;
+UPDATE games SET state = 'FINISHED' WHERE state NOT IN ('WAITING', 'ACTIVE', 'FINISHED');
+
+-- Add uniqueness constraint to prevent duplicate game players
+ALTER TABLE game_players 
+ADD CONSTRAINT unique_game_player UNIQUE (game_id, user_id);

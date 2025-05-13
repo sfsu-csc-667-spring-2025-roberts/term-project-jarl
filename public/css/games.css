@@ -1,67 +1,375 @@
-main {
-  display: grid;
-  padding: 0.75rem 5rem;
+.game-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px);
+  margin-top: 20px;
 }
 
-#game-header {
+.game-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
-#leave-game-btn {
-  background-color: rgb(221, 221, 221);
-  color: black;
-  border: 1px solid rgb(221, 221, 221);
-  border-radius: 5px;
-  padding: 0.5rem 1rem;
+.game-actions {
+  display: flex;
+  gap: 10px;
 }
 
-#leave-game-btn:hover {
-  background-color: rgba(150, 150, 150, 0.651);
+#game-board {
+  display: flex;
+  flex-direction: row;
+  height: 70%;
+  gap: 20px;
 }
 
-#leave-game-container {
+.table {
+  flex: 3;
+  background-color: #2d6a4f;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  border: 10px solid #1b4332;
+}
+
+.top-row, .middle-row, .bottom-row {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.player-position {
+  width: 120px;
+  height: 120px;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
-#leave-game-container.hidden {
-  display: none;
-}
-
-#leave-game-modal {
-  background-color: rgb(255, 255, 255);
-  padding: 1rem 2rem;
-  width: 50%;
-  border-radius: 0.5rem;
-  display: grid;
-  gap: 0.5rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-#leave-game-modal > form {
+.center-area {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  width: 60%;
 }
 
-#leave-game-modal > form > button {
-  background-color: rgb(221, 221, 221);
+.community-cards {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pot {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.player-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.player-hand {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.bet-slider-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#bet-slider {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+#bet-amount {
+  font-weight: bold;
+}
+
+.chat-box {
+  height: 30%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid #dee2e6;
+}
+
+.chat-input-area input {
+  flex: 1;
+}
+
+.player {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.player.current-player {
+  box-shadow: 0 0 0 4px #ffd500, 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: pulse 1.5s infinite;
+}
+
+.player.folded {
+  opacity: 0.6;
+}
+
+.player.dealer::before {
+  content: 'D';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.player.small-blind::before {
+  content: 'SB';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.player.big-blind::before {
+  content: 'BB';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.player.is-me {
+  background-color: rgba(173, 216, 230, 0.7);
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.player-chips {
+  font-size: 12px;
+}
+
+.player-bet {
+  font-size: 12px;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.card {
+  width: 60px;
+  height: 90px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card.red {
+  color: red;
+}
+
+.card.black {
   color: black;
-  border: 1px solid rgb(221, 221, 221);
-  border-radius: 0.5px;
-  padding: 0.5rem 1rem;
 }
 
-#confirm-leave-btn:hover,
-#cancel-leave-btn:hover {
-  background-color: rgba(148, 148, 148, 0.651);
+.card-back {
+  background-image: linear-gradient(45deg, #2c3e50 25%, transparent 25%),
+                   linear-gradient(-45deg, #2c3e50 25%, transparent 25%),
+                   linear-gradient(45deg, transparent 75%, #2c3e50 75%),
+                   linear-gradient(-45deg, transparent 75%, #2c3e50 75%);
+  background-size: 20px 20px;
+  background-color: #4a69bd;
+}
+
+.card-placeholder {
+  background-color: rgba(255, 255, 255, 0.3);
+  border: 1px dashed #ccc;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.card-suit {
+  font-size: 28px;
+}
+
+.waiting-message {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  width: 100%;
+}
+
+.winner-announcement {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 215, 0, 0.9);
+  color: #000;
+  padding: 20px 40px;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  z-index: 10;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.chat-message {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background-color: #e9ecef;
+}
+
+.chat-message.my-message {
+  background-color: #d1e7dd;
+  align-self: flex-end;
+}
+
+.username {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 4px rgba(255, 213, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 213, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(255, 213, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  #game-board {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .table {
+    height: 500px;
+  }
+  
+  .player-area {
+    margin-top: 20px;
+  }
 }

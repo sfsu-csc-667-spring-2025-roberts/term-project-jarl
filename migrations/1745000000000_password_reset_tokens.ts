@@ -1,34 +1,22 @@
-// import { QueryFile } from "pg-promise";
-// import path from "path";
+import { IDatabase } from 'pg-promise';
 
-// export default {
-//   up: new QueryFile(
-//     path.join(__dirname, "1745000000000_password_reset_tokens.sql"),
-//   ),
-//   down: new QueryFile(
-//     path.join(__dirname, "1745000000000_password_reset_tokens_down.sql"),
-//   ),
-// };
+export async function up(db: IDatabase<{}>) {
+  await db.none(`
+    CREATE TABLE password_reset_tokens (
+      id SERIAL PRIMARY KEY,
+      email VARCHAR(255) NOT NULL,
+      token VARCHAR(255) NOT NULL UNIQUE,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX idx_password_reset_tokens_token ON password_reset_tokens(token);
+    CREATE INDEX idx_password_reset_tokens_email ON password_reset_tokens(email);
+  `);
+}
 
-// Uncomment the following code if you want to use the migration builder directly instead of SQL files
-import type { MigrationBuilder } from "node-pg-migrate";
-
-export const up = (pgm: MigrationBuilder) => {
-  pgm.createTable("password_reset_tokens", {
-    id: { type: "serial", primaryKey: true },
-    email: { type: "VARCHAR(255)", notNull: true },
-    token: { type: "VARCHAR(255)", notNull: true, unique: true },
-    expires_at: { type: "TIMESTAMP", notNull: true },
-    created_at: {
-      type: "TIMESTAMP",
-      default: pgm.func("CURRENT_TIMESTAMP"),
-    },
-  });
-
-  pgm.createIndex("password_reset_tokens", "token");
-  pgm.createIndex("password_reset_tokens", "email");
-};
-
-export const down = (pgm: MigrationBuilder) => {
-  pgm.dropTable("password_reset_tokens");
-};
+export async function down(db: IDatabase<{}>) {
+  await db.none(`
+    DROP TABLE password_reset_tokens;
+  `);
+}

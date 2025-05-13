@@ -1,21 +1,17 @@
-import { ColumnDefinitions, MigrationBuilder } from "node-pg-migrate";
+import { IDatabase } from 'pg-promise';
 
-export const shorthands: ColumnDefinitions | undefined = undefined;
-
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.createTable("cards", {
-    card_id: "id",
-    value: {
-      type: "varchar(255)",
-      notNull: true,
-    },
-    shape: {
-      type: "varchar(255)",
-      notNull: true,
-    },
-  });
+export async function up(db: IDatabase<{}>) {
+  await db.none(`
+    CREATE TABLE cards (
+      card_id SERIAL PRIMARY KEY,
+      value VARCHAR(255) NOT NULL,
+      shape VARCHAR(255) NOT NULL
+    );
+  `);
 }
 
-export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropTable("cards");
+export async function down(db: IDatabase<{}>) {
+  await db.none(`
+    DROP TABLE cards;
+  `);
 }
