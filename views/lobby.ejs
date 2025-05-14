@@ -80,7 +80,10 @@
     <section style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
       <button>Add Funds</button>
       <button>Cash Out</button>
-      <button>Join</button>
+      <form action="/games/join" method="post">
+        <input type="hidden" name="gameId" value="2"/>
+        <button type="submit">Join</button>
+      </form>
       <button id="show-create-form">Create a new game</button>
     </section>
 

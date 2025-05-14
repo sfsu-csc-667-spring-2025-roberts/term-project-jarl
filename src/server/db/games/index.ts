@@ -27,35 +27,40 @@ const join = async (gameId: number, userId: number, isHost = false) => {
   await db.none(JOIN_SQL, [gameId, userId, isHost]);
 };
 
-const CONDITIONAL_JOIN_SQL = `
-    INSERT INTO gamePlayers (game_id, user_id)
-    SELECT $(gameId), $(userId) 
-    WHERE NOT EXISTS (
-    SELECT 'value-doesnt-matter' 
-    FROM gamePlayers 
-    WHERE game_id=$(gameId) AND user_id=$(userId)
-    )
-    AND (
-    SELECT COUNT(*) FROM games WHERE id=$(gameId) AND password=$(password)
-    ) = 1
-    AND (
-    (
-        SELECT COUNT(*) FROM gamePlayers WHERE game_id=$(gameId)
-    ) < (
-        SELECT max_players FROM games WHERE id=$(gameId)
-    )
-    )
-    RETURNING (
-    SELECT COUNT(*) FROM gamePlayers WHERE game_id=$(gameId)
-    )
+const CONDITIONALLY_JOIN_SQL = `
+INSERT INTO game_players (game_id, user_id)
+SELECT $(gameId), $(userId)
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM game_players
+  WHERE game_id = $(gameId) AND user_id = $(userId)
+)
+AND EXISTS (
+  SELECT 1
+  FROM games
+  WHERE game_id = $(gameId) AND (password IS NULL OR password = $(password))
+)
+AND (
+  SELECT COUNT(*)
+  FROM game_players
+  WHERE game_id = $(gameId)
+) < (
+  SELECT max_players
+  FROM games
+  WHERE game_id = $(gameId)
+)
+RETURNING COUNT(*)
 `;
+
+// get join game to work check 4/24 or 4/28 recording to figure it out
+// maybe ask for help or collaborate better with teammates
 
 const conditionalJoin = async (
   gameId: number,
   userId: number,
   password: string,
 ) => {
-  const { player_count } = await db.one(CONDITIONAL_JOIN_SQL, [
+  const { player_count } = await db.one(CONDITIONALLY_JOIN_SQL, [
     gameId,
     userId,
     password,
