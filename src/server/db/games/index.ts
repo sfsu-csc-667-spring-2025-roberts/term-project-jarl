@@ -28,28 +28,28 @@ const join = async (gameId: number, userId: number, isHost = false) => {
 };
 
 const CONDITIONALLY_JOIN_SQL = `
-INSERT INTO game_players (game_id, user_id)
-SELECT $(gameId), $(userId)
+INSERT INTO "gamePlayers" (game_id, user_id)
+SELECT $[gameId], $[userId]
 WHERE NOT EXISTS (
   SELECT 1
-  FROM game_players
-  WHERE game_id = $(gameId) AND user_id = $(userId)
+  FROM "gamePlayers"
+  WHERE game_id = $[gameId] AND user_id = $[userId]
 )
 AND EXISTS (
   SELECT 1
   FROM games
-  WHERE game_id = $(gameId) AND (password IS NULL OR password = $(password))
+  WHERE game_id = $[gameId] AND (password IS NULL OR password = $[password] OR (password = '' AND $[password] IS NULL))
 )
 AND (
   SELECT COUNT(*)
-  FROM game_players
-  WHERE game_id = $(gameId)
+  FROM "gamePlayers"
+  WHERE game_id = $[gameId]
 ) < (
   SELECT max_players
   FROM games
-  WHERE game_id = $(gameId)
+  WHERE game_id = $[gameId]
 )
-RETURNING COUNT(*)
+RETURNING game_id, user_id
 `;
 
 // get join game to work check 4/24 or 4/28 recording to figure it out
@@ -60,12 +60,24 @@ const conditionalJoin = async (
   userId: number,
   password: string,
 ) => {
-  const { player_count } = await db.one(CONDITIONALLY_JOIN_SQL, [
+  // Insert the player into the game
+  await db.one(CONDITIONALLY_JOIN_SQL, {
     gameId,
     userId,
     password,
-  ]);
-  return player_count;
+  });
+
+  // Calculate the player count for the game
+  const { count } = await db.one(
+    `
+    SELECT COUNT(*)
+    FROM "gamePlayers"
+    WHERE game_id = $1
+    `,
+    [gameId],
+  );
+
+  return count;
 };
 
 const playerCount = async (gameId: number) => {
