@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <div id="join-game-container" class="hidden">
+        <form action="/games/join" method="POST">
+          <a href="#" id="hide-join-form">x</a>
+          <div>
+            <label for="gameId">Game Id:</label>
+            <input
+              type="text"
+              id="gameId"
+              name="gameId"
+              placeholder="Type game id to join"
+            />
+          </div>
+          <button id="join-game-btn" type="submit" value="Join Game">Join Game</button>
+        </form>
+      </div>
+</body>
+</html>

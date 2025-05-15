@@ -1,4 +1,5 @@
-div#create-game-container {
+div#create-game-container,
+div#join-game-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -10,11 +11,13 @@ div#create-game-container {
   display: flex;
 }
 
+div#join-game-container.hidden,
 div#create-game-container.hidden {
   display: none;
 }
 
-div#create-game-container form {
+div#create-game-container form,
+div#join-game-container form {
   width: 500px;
   margin: 0 auto;
   background-color: white;
@@ -24,7 +27,8 @@ div#create-game-container form {
   position: relative;
 }
 
-div#create-game-container form div {
+div#create-game-container form div,
+div#join-game-container form div {
   display: flex;
   margin-bottom: 10px;
   align-items: center;
@@ -34,7 +38,8 @@ div#create-game-container form div label {
   width: 150px;
 }
 
-div#create-game-container form div > input {
+div#create-game-container form div > input,
+div#join-game-container form div > input {
   flex-grow: 1;
   padding: 5px;
   /* add font-size:  */
@@ -57,7 +62,8 @@ a#show-create-form {
   color: black;
 }
 
-div#create-game-container form a#hide-create-form {
+div#create-game-container form a#hide-create-form,
+div#join-game-container form a#hide-join-form {
   text-decoration: none;
   font-size: large;
   position: absolute;
@@ -66,7 +72,8 @@ div#create-game-container form a#hide-create-form {
   color: black;
 }
 
-#create-game-btn {
+#create-game-btn,
+#join-game-btn {
   padding: 0.25rem;
   background-color: rgb(231, 231, 231);
   color: black;
