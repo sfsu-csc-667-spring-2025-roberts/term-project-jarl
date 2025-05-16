@@ -42,6 +42,28 @@ leaveGameContainer!.addEventListener("click", (e) => {
   }
 });
 
+confirmLeaveBtn!.addEventListener("click", (e) => {
+  e.preventDefault();
+  leaveGameContainer!.classList.toggle("hidden");
+  fetch(`/games/${gameId}/leave`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (response.ok) {
+        console.log(`in client, there are ${response} data`);
+        window.location.href = "/";
+      } else {
+        console.error("Failed to leave game");
+      }
+    })
+    .catch((error) => {
+      console.error("Error leaving game:", error);
+    });
+});
+
 console.log(`game:${gameId}:player-joined`);
 socket.on(`game:${gameId}:player-joined`, (data) => {
   console.log("data in games.ts with socket on from join is");

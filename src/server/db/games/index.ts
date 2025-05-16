@@ -87,4 +87,24 @@ const playerCount = async (gameId: number) => {
   );
 };
 
-export default { create, join, conditionalJoin, playerCount };
+const leaveGame = async (gameId: number, userId: number) => {
+  await db.none(
+    `
+    DELETE FROM "gamePlayers"
+    WHERE game_id = $1 AND user_id = $2
+    `,
+    [gameId, userId],
+  );
+
+  const { count } = await db.one(
+    `
+    SELECT COUNT(*)
+    FROM "gamePlayers"
+    WHERE game_id = $1
+    `,
+    [gameId],
+  );
+  return count;
+};
+
+export default { create, join, conditionalJoin, playerCount, leaveGame };

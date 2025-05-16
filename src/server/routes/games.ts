@@ -84,4 +84,19 @@ router.get("/:gameId", (request: Request, response: Response) => {
   response.render("games", { gameId, user });
 });
 
+router.post("/:gameId/leave", async (request: Request, response: Response) => {
+  const { gameId } = request.params;
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+  const count = await Game.leaveGame(parseInt(gameId), userId);
+  const io = request.app.get<Server>("io");
+  io.on("connection", (socket) => {
+    socket.emit(`game:${gameId}:player-left`, {
+      userId,
+      gameId,
+      count,
+    });
+  });
+  response.redirect("/");
+});
 export default router;
