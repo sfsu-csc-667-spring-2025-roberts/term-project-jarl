@@ -50,19 +50,16 @@ router.post("/create", async (request: Request, response: Response) => {
 router.post("/join", async (request: Request, response: Response) => {
   // @ts-ignore
   const { user_id: userId, email, gravatar } = request.session.user;
-  const { gameId, gamePassword } = request.body;
+  const { gameId, joinGamePassword } = request.body;
 
   try {
     const playerCount = await Game.conditionalJoin(
       gameId,
       userId,
-      gamePassword,
+      joinGamePassword,
     );
     const io = request.app.get<Server>("io");
     io.on("connection", (socket) => {
-      socket.on("ex2", (args) => {
-        console.log("ex2 in route");
-      });
       socket.emit(`game:${gameId}:player-joined`, {
         playerCount,
         userId,
