@@ -42,6 +42,8 @@ router.post("/create", async (request: Request, response: Response) => {
   } catch (err) {
     console.error("error creating game: ", err);
     response.status(500).send("error creating game");
+
+    // add join game form
   }
 });
 
