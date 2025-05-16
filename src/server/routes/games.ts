@@ -59,13 +59,17 @@ router.post("/join", async (request: Request, response: Response) => {
       gamePassword,
     );
     const io = request.app.get<Server>("io");
-    io.emit(`game:${gameId}:player-joined`, {
-      playerCount,
-      userId,
-      email,
-      gravatar,
+    io.on("connection", (socket) => {
+      socket.on("ex2", (args) => {
+        console.log("ex2 in route");
+      });
+      socket.emit(`game:${gameId}:player-joined`, {
+        playerCount,
+        userId,
+        email,
+        gravatar,
+      });
     });
-
     response.redirect(`/games/${gameId}`);
   } catch (error) {
     console.error("error joining game: ", error);
