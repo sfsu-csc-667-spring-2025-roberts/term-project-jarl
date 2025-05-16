@@ -66,6 +66,24 @@
       }
     });
   </script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on("chat-message:global", (msg) => {
+      const container = document.getElementById("chat-messages");
+
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <img src="${msg.gravatar}" width="24" height="24" style="border-radius: 50%; vertical-align: middle;">
+        <strong>${msg.sender}:</strong> ${msg.message}
+        <span style="font-size: 0.8em; color: gray;">(${new Date(msg.timestamp).toLocaleTimeString()})</span>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    });
+  </script>
   
   <main style="display: flex; padding: 20px; gap: 20px;">
     <!-- Game List -->
@@ -92,12 +110,14 @@
         <div style="height: 100px; border: 1px solid black;">Friends go here</div>
       </div>
 
+
+
       <!-- Chat goes here -->
       <div style="margin-top: 200px; display: flex; flex-direction: column;">
         <h3>Global Chat</h3>
         <div style="height: 450px; overflow-y: auto; border: 1px solid black; padding: 5px; background: #f9f9f9;">
-        <form method="POST" action="/chat" style="display: flex; align-items: flex-end; gap: 5px; margin-top: 5px; height: 100%;">
-          <input type="text" name="message" placeholder="Message" style="flex: 1;" />
+        <form method="POST" action="/chat/global" style="display: flex; align-items: flex-end; gap: 5px; margin-top: 5px; height: 100%;">
+          <input type="text" name="message"  placeholder="Message" style="flex: 1;" required />
           <button type="submit">Send</button>
         </form>
         </div>

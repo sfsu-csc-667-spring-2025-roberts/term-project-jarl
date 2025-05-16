@@ -124,7 +124,7 @@ try {
 
   // Start the server
   console.log("Starting server...");
-  const server = app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     clearTimeout(safetyTimeout); // Clear the safety timeout once server starts
   });

@@ -26,7 +26,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     },
     game_player_id: {
       type: "integer",
-      notNull: true,
+      notNull: false,
       references: '"gamePlayers"',
     },
   });
