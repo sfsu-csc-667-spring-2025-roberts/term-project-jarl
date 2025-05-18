@@ -7,10 +7,11 @@
     <link rel="stylesheet" href="/css/games.css" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="/js/games.js" defer></script>
+
   </head> 
   <body>
     <%- include('partials/header', { user: locals.user }) %>
-    <main id="">
+    <main id="gameId-<%= gameId %>">
        <!-- Welcome message to user, should prob edit or delete later  -->
       <div id="game-header">
         <div>

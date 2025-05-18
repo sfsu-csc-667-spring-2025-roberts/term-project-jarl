@@ -50,22 +50,23 @@ router.post("/create", async (request: Request, response: Response) => {
 router.post("/join", async (request: Request, response: Response) => {
   // @ts-ignore
   const { user_id: userId, email, gravatar } = request.session.user;
-  const { gameId, gamePassword } = request.body;
+  const { gameId, joinGamePassword } = request.body;
 
   try {
     const playerCount = await Game.conditionalJoin(
       gameId,
       userId,
-      gamePassword,
+      joinGamePassword,
     );
     const io = request.app.get<Server>("io");
-    io.emit(`game:${gameId}:player-joined`, {
-      playerCount,
-      userId,
-      email,
-      gravatar,
+    io.on("connection", (socket) => {
+      socket.emit(`game:${gameId}:player-joined`, {
+        playerCount,
+        userId,
+        email,
+        gravatar,
+      });
     });
-
     response.redirect(`/games/${gameId}`);
   } catch (error) {
     console.error("error joining game: ", error);
@@ -80,4 +81,19 @@ router.get("/:gameId", (request: Request, response: Response) => {
   response.render("games", { gameId, user });
 });
 
+router.post("/:gameId/leave", async (request: Request, response: Response) => {
+  const { gameId } = request.params;
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+  const count = await Game.leaveGame(parseInt(gameId), userId);
+  const io = request.app.get<Server>("io");
+  io.on("connection", (socket) => {
+    socket.emit(`game:${gameId}:player-left`, {
+      userId,
+      gameId,
+      count,
+    });
+  });
+  response.redirect("/");
+});
 export default router;

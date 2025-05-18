@@ -12,13 +12,13 @@ const configureSockets = (io: Server, app: Express) => {
     const { id, user } = socket.request.session;
 
     console.log(
-      `User [${user.id}] connected: ${user.email} with session id ${id}`,
+      `User [${user.user_id}] connected: ${user.email} with session id ${id}`,
     );
     socket.join(user.id);
 
     socket.on("disconnect", () => {
       console.log(
-        `User [${user.id}] disconnected: ${user.email} with session id ${id}`,
+        `User [${user.user_id}] disconnected: ${user.email} with session id ${id}`,
       );
     });
   });
