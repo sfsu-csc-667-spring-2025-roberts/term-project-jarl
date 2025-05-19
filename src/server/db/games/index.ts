@@ -1,9 +1,9 @@
 import db from "../connection";
 
 const CREATE_SQL = `
-INSERT INTO games (name, min_players, max_players, password)
-VALUES ($1, $2, $3, $4)
-RETURNING game_id
+INSERT INTO games (name, min_players, max_players, password, created_by, state)
+VALUES ($1, $2, $3, $4, $5, 'waiting')
+RETURNING id
 `;
 
 const create = async (
@@ -13,14 +13,23 @@ const create = async (
   max?: number,
   password?: string,
 ) => {
-  const { game_id } = await db.one(CREATE_SQL, [name, min, max, password]);
-  await join(game_id, creator, true);
-  return game_id;
+  const { id } = await db.one(CREATE_SQL, [
+    name ?? "",
+    min ?? 2,
+    max ?? 4,
+    password ?? "",
+    creator,
+  ]);
+
+  await join(id, creator, true);
+  return id;
 };
 
 const JOIN_SQL = `
-INSERT INTO "gamePlayers" (game_id, user_id, is_host)
-VALUES ($1, $2, $3)
+INSERT INTO game_players (game_id, user_id, is_host, seat_position)
+VALUES ($1, $2, $3, (
+  SELECT COALESCE(MAX(seat_position), 0) + 1 FROM game_players WHERE game_id = $1
+))
 `;
 
 const join = async (gameId: number, userId: number, isHost = false) => {
@@ -38,7 +47,8 @@ WHERE NOT EXISTS (
 AND EXISTS (
   SELECT 1
   FROM games
-  WHERE game_id = $[gameId] AND (password IS NULL OR password = $[password] OR (password = '' AND $[password] IS NULL))
+  WHERE id = $[gameId]
+    AND (password IS NULL OR password = $[password] OR (password = '' AND $[password] IS NULL))
 )
 AND (
   SELECT COUNT(*)
@@ -47,33 +57,24 @@ AND (
 ) < (
   SELECT max_players
   FROM games
-  WHERE game_id = $[gameId]
+  WHERE id = $[gameId]
 )
 RETURNING game_id, user_id
 `;
-
-// get join game to work check 4/24 or 4/28 recording to figure it out
-// maybe ask for help or collaborate better with teammates
 
 const conditionalJoin = async (
   gameId: number,
   userId: number,
   password: string,
 ) => {
-  // Insert the player into the game
   await db.one(CONDITIONALLY_JOIN_SQL, {
     gameId,
     userId,
     password,
   });
 
-  // Calculate the player count for the game
   const { count } = await db.one(
-    `
-    SELECT COUNT(*)
-    FROM "gamePlayers"
-    WHERE game_id = $1
-    `,
+    `SELECT COUNT(*) FROM "gamePlayers" WHERE game_id = $1`,
     [gameId],
   );
 
@@ -85,6 +86,8 @@ const playerCount = async (gameId: number) => {
     "SELECT COUNT(*) FROM gamePlayers WHERE game_id = $1",
     [gameId],
   );
+  return count;
 };
 
-export default { create, join, conditionalJoin, playerCount };
+export const Game = { create, join, conditionalJoin, playerCount };
+export default Game;

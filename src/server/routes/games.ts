@@ -1,17 +1,17 @@
+// src/server/routes/games.ts
 import express from "express";
 import { Request, Response } from "express";
-import { Game } from "../db";
 import { Server } from "socket.io";
+import { Game } from "../db";
+import db from "../db/connection";
 
 const router = express.Router();
 
-// i think i fixed the errro just look at terminal error now
-
-router.post("/create", async (request: Request, response: Response) => {
+// --- Create game route ---
+router.post("/create", async (req: Request, res: Response) => {
   // @ts-ignore
-  const { user_id: userId, email, gravatar } = request.session.user;
-  const { gameName, gameMinPlayers, gameMaxPlayers, gamePassword } =
-    request.body;
+  const { user_id: userId, email, gravatar } = req.session.user;
+  const { gameName, gameMinPlayers, gameMaxPlayers, gamePassword } = req.body;
 
   try {
     const gameId = await Game.create(
@@ -21,36 +21,29 @@ router.post("/create", async (request: Request, response: Response) => {
       gameMaxPlayers,
       gamePassword,
     );
-    if (gameId) {
-      const io = request.app.get<Server>("io");
-      io.emit("game:created", {
-        gameId,
-        gameName: gameName ?? `Game ${gameId}`,
-        gameMinPlayers,
-        gameMaxPlayers,
-        hasPassword: gamePassword !== undefined,
-        host: {
-          user_id: userId,
-          email,
-          gravatar,
-        },
-      });
-      response.redirect(`/games/${gameId}`);
-    } else {
-      response.status(500).send("error creating game here");
-    }
-  } catch (err) {
-    console.error("error creating game: ", err);
-    response.status(500).send("error creating game");
 
-    // add join game form
+    const io = req.app.get<Server>("io");
+    io.emit("game:created", {
+      gameId,
+      gameName: gameName ?? `Game ${gameId}`,
+      gameMinPlayers,
+      gameMaxPlayers,
+      hasPassword: !!gamePassword,
+      host: { user_id: userId, email, gravatar },
+    });
+
+    res.redirect(`/games/${gameId}`);
+  } catch (err) {
+    console.error("error creating game:", err);
+    res.status(500).send("Error creating game");
   }
 });
 
-router.post("/join", async (request: Request, response: Response) => {
+// --- Join game route ---
+router.post("/join", async (req: Request, res: Response) => {
   // @ts-ignore
-  const { user_id: userId, email, gravatar } = request.session.user;
-  const { gameId, gamePassword } = request.body;
+  const { user_id: userId, email, gravatar } = req.session.user;
+  const { gameId, gamePassword } = req.body;
 
   try {
     const playerCount = await Game.conditionalJoin(
@@ -58,7 +51,7 @@ router.post("/join", async (request: Request, response: Response) => {
       userId,
       gamePassword,
     );
-    const io = request.app.get<Server>("io");
+    const io = req.app.get<Server>("io");
     io.emit(`game:${gameId}:player-joined`, {
       playerCount,
       userId,
@@ -66,18 +59,37 @@ router.post("/join", async (request: Request, response: Response) => {
       gravatar,
     });
 
-    response.redirect(`/games/${gameId}`);
+    res.redirect(`/games/${gameId}`);
   } catch (error) {
-    console.error("error joining game: ", error);
-    response.status(500).send("error joining game");
+    console.error("error joining game:", error);
+    res.status(500).send("Error joining game");
   }
 });
 
-router.get("/:gameId", (request: Request, response: Response) => {
-  const { gameId } = request.params;
+// --- View game page ---
+router.get("/:gameId", (req: Request, res: Response) => {
+  const { gameId } = req.params;
   // @ts-ignore
-  const user = request.session.user;
-  response.render("games", { gameId, user });
+  const user = req.session.user;
+  res.render("games", { gameId, user });
+});
+
+// --- Start game ---
+router.post("/:id/start", async (req: Request, res: Response) => {
+  const gameId = parseInt(req.params.id);
+
+  try {
+    // ✅ FINAL FIX: Use correct column name "id"
+    await db.none("UPDATE games SET state = 'started' WHERE id = $1", [gameId]);
+
+    const io = req.app.get<Server>("io");
+    io.emit(`game:${gameId}:started`, { gameId });
+
+    res.status(200).json({ message: "Game started successfully." });
+  } catch (error) {
+    console.error("Failed to start game:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 export default router;
