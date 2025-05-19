@@ -1,10 +1,3 @@
-/*
-when i click the leave game button, the leave game modal should appear (not be hidden)
-if i click no in the modal, it should hide it
-if i click yes, it should call the appropriate route, 
-prob delete that game_player_id, update state, and go back to lobby
-*/
-
 import io from "socket.io-client";
 
 const socket = io();
@@ -20,6 +13,9 @@ const confirmLeaveBtn =
   document.querySelector<HTMLButtonElement>("#confirm-leave-btn");
 const cancelLeaveBtn =
   document.querySelector<HTMLButtonElement>("#cancel-leave-btn");
+
+const startGameButton =
+  document.querySelector<HTMLButtonElement>("#start-game-btn");
 
 const main = document.querySelector<HTMLDivElement>("main");
 const mainId = main!.id;
@@ -67,5 +63,37 @@ confirmLeaveBtn!.addEventListener("click", (e) => {
 console.log(`game:${gameId}:player-joined`);
 socket.on(`game:${gameId}:player-joined`, (data) => {
   console.log("data in games.ts with socket on from join is");
+  console.log(data);
+});
+
+startGameButton!.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  startGameButton.disabled = true;
+
+  fetch(`/games/${gameId}/start`, {
+    method: "POST",
+  })
+    .then((response) => {
+      if (response.ok) {
+        console.log("started game in client");
+        startGameButton.parentNode?.removeChild(startGameButton);
+      } else {
+        console.error("Failed to start game");
+        startGameButton.disabled = false;
+      }
+    })
+    .catch((error) => {
+      console.error("Error starting game:", error);
+    });
+});
+
+socket.on(`game:${gameId}:start:error`, (data) => {
+  console.log("start game err, data:");
+  console.log(data);
+});
+
+socket.on(`game:${gameId}:start:success`, (data) => {
+  console.log("start game success, data:");
   console.log(data);
 });

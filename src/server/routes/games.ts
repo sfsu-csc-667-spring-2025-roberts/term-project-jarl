@@ -96,4 +96,40 @@ router.post("/:gameId/leave", async (request: Request, response: Response) => {
   });
   response.redirect("/");
 });
+
+router.post("/:gameId/start", async (request: Request, response: Response) => {
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+
+  const { gameId } = request.params;
+  const hostId = await Game.findHostId(parseInt(gameId));
+
+  const io = request.app.get<Server>("io");
+
+  if (hostId !== userId) {
+    console.log("You are not the host. You cannot start the game;");
+    // response.status(403).send("You are not the host. You cannot start the game.");
+    io.emit(`game:${gameId}:start:error`, {
+      message: "Only the host can start the game",
+    });
+    return;
+  }
+  // for the start game, what needs to happen?
+  // get and shuffle cards? then start rotation?
+
+  // shuffle deck, create each cardsHeld for each player from that shuffledCards array
+  // create flop, turn, river arrays/variables to send to client maybe?
+  // assign rotations and set the active player
+  // broadcast state update with order of cards to client maybe
+  console.log("started game");
+  const shuffledCards = await Game.getShuffledCards();
+  console.log("shuffled cards");
+  console.log(shuffledCards);
+
+  io.emit(`game:${gameId}:start:success`, {
+    message: "Game started successfully",
+  });
+  response.status(200).send("Game started successfully");
+});
+
 export default router;

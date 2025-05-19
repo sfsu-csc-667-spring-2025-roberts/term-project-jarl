@@ -52,9 +52,6 @@ AND (
 RETURNING game_id, user_id
 `;
 
-// get join game to work check 4/24 or 4/28 recording to figure it out
-// maybe ask for help or collaborate better with teammates
-
 const conditionalJoin = async (
   gameId: number,
   userId: number,
@@ -107,4 +104,35 @@ const leaveGame = async (gameId: number, userId: number) => {
   return count;
 };
 
-export default { create, join, conditionalJoin, playerCount, leaveGame };
+const findHostId = async (gameId: number) => {
+  const { user_id } = await db.one(
+    `
+    SELECT user_id
+    FROM "gamePlayers"
+    WHERE game_id = $1 AND is_host = true
+    `,
+    [gameId],
+  );
+  return user_id;
+};
+
+const getShuffledCards = async () => {
+  const cards = await db.many(
+    `
+    SELECT *
+    FROM cards
+    ORDER BY RANDOM()
+    `,
+  );
+  return cards;
+};
+
+export default {
+  create,
+  join,
+  conditionalJoin,
+  playerCount,
+  leaveGame,
+  findHostId,
+  getShuffledCards,
+};
