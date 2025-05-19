@@ -1,6 +1,25 @@
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 
-const socket = io();
+const socket = io(window.location.origin, {
+  withCredentials: true,
+  transports: ["websocket"],
+});
+
+function getCardDisplay(value: string): string {
+  const num = parseInt(value);
+  switch (num) {
+    case 11:
+      return "J";
+    case 12:
+      return "Q";
+    case 13:
+      return "K";
+    case 14:
+      return "A";
+    default:
+      return value;
+  }
+}
 
 const leaveGameBtn =
   document.querySelector<HTMLButtonElement>("#leave-game-btn");
@@ -69,7 +88,7 @@ socket.on(`game:${gameId}:player-joined`, (data) => {
 startGameButton!.addEventListener("click", (e) => {
   e.preventDefault();
 
-  startGameButton.disabled = true;
+  startGameButton!.disabled = true;
 
   fetch(`/games/${gameId}/start`, {
     method: "POST",
@@ -77,10 +96,10 @@ startGameButton!.addEventListener("click", (e) => {
     .then((response) => {
       if (response.ok) {
         console.log("started game in client");
-        startGameButton.parentNode?.removeChild(startGameButton);
+        startGameButton!.parentNode?.removeChild(startGameButton!);
       } else {
         console.error("Failed to start game");
-        startGameButton.disabled = false;
+        startGameButton!.disabled = false;
       }
     })
     .catch((error) => {
@@ -96,4 +115,55 @@ socket.on(`game:${gameId}:start:error`, (data) => {
 socket.on(`game:${gameId}:start:success`, (data) => {
   console.log("start game success, data:");
   console.log(data);
+});
+function renderCard(card: { value: string; shape: string }) {
+  const container = document.getElementById("card-container");
+  if (!container) return;
+
+  const cardDiv = document.createElement("div");
+  cardDiv.className = "card";
+
+  const valueDiv = document.createElement("div");
+  valueDiv.className = "card-value";
+  valueDiv.textContent = getCardDisplay(card.value);
+
+  const suitDiv = document.createElement("div");
+  suitDiv.className = "card-suit";
+  suitDiv.textContent = card.shape;
+
+  cardDiv.appendChild(valueDiv);
+  cardDiv.appendChild(suitDiv);
+  container.appendChild(cardDiv);
+}
+
+// When card is received from backend
+socket.on("dealCard", (card) => {
+  console.log("Card received from backend:", card);
+  renderCard(card);
+});
+// In-Game Chat functionality
+const chatForm = document.getElementById("game-chat-form") as HTMLFormElement;
+const chatInput = document.getElementById(
+  "game-chat-input",
+) as HTMLInputElement;
+const chatMessages = document.getElementById(
+  "game-chat-messages",
+) as HTMLDivElement;
+
+chatForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const message = chatInput.value.trim();
+  if (message) {
+    socket.emit("gameChatMessage", message);
+    chatInput.value = "";
+  }
+});
+
+// When a chat message is received from the server
+socket.on("gameChatMessage", (data: { user: string; content: string }) => {
+  const messageDiv = document.createElement("div");
+  messageDiv.className = "chat-message";
+  messageDiv.innerHTML = `<strong>${data.user}</strong>: ${data.content}`;
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 });

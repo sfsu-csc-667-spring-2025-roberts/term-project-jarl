@@ -23,7 +23,26 @@
       </div>
 
       <!-- Actual table with cards, player PFPs and pot  -->
-      <div></div>
+      <div id="card-container" class="card-container">
+      <!-- Cards will be rendered here -->
+      </div>
+      <!-- Poker Table UI -->
+      <div id="poker-table">
+        <div class="player-seat" id="player-1">Player 1</div>
+        <div class="player-seat" id="player-2">Player 2</div>
+        <div class="player-seat" id="player-3">Player 3</div>
+        <div class="player-seat" id="player-4">Player 4</div>
+
+        <div id="pot">Pot: $0</div>
+      </div>
+
+      <!-- Game Controls -->
+      <div id="action-buttons">
+        <button id="btn-call">Call</button>
+        <button id="btn-raise">Raise</button>
+        <button id="btn-fold">Fold</button>
+      </div>
+
 
       <!-- Game action buttons (call, raise, fold, etc.) and game chat  -->
       <div>
@@ -32,8 +51,18 @@
       <div id="leave-game-container" class="hidden">
         <%- include('shared/leave-game') %>
       </div>
+      <!-- In-Game Chat UI -->
+
     </main>
     <!-- TODO: uncomment later  -->
     <!-- include('shared/templates')  -->
+     <div id="game-chat-container">
+      <div id="game-chat-messages" class="chat-messages"></div>
+      <form id="game-chat-form">
+        <input id="game-chat-input" type="text" placeholder="Type your message..." autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+     </div>
+
   </body>
 </html>
