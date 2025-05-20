@@ -80,3 +80,16 @@ div#join-game-container form a#hide-join-form {
   border: 1px solid black;
   border-radius: 0.25rem;
 }
+
+#games-list-container {
+  display: grid;
+  gap: 0.75rem;
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.game-item {
+  border-bottom: 0.1px solid black;
+}

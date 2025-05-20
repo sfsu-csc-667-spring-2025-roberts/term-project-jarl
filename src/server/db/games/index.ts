@@ -127,6 +127,41 @@ const getShuffledCards = async () => {
   return cards;
 };
 
+const CREATE_CARDS_HELD_SQL = `
+  INSERT INTO "cardsHeld" (game_player_id, card_id)
+  VALUES ($1, $2)
+  RETURNING card_held_id
+`;
+const GET_CARDS_HELD_SQL = `
+  SELECT card_held_id, game_player_id, card_id
+  FROM "cardsHeld"
+  WHERE game_player_id = $1
+  ORDER BY card_held_id
+`;
+
+const createCardsHeldForPlayer = async (
+  gamePlayerId: number,
+  cardId: number,
+) => {
+  const cardHeldId = await db.one(CREATE_CARDS_HELD_SQL, [
+    gamePlayerId,
+    cardId,
+  ]);
+  return cardHeldId;
+};
+
+const getCardsHeldForPlayer = async (gamePlayerId: number) => {
+  const cardsHeld = await db.many(GET_CARDS_HELD_SQL, [gamePlayerId]);
+  return cardsHeld;
+};
+
+const GET_ALL_GAMES_SQL = `SELECT game_id, password FROM games ORDER BY game_id DESC`;
+
+const getAllGames = async () => {
+  const games = await db.many(GET_ALL_GAMES_SQL);
+  return games;
+};
+
 export default {
   create,
   join,
@@ -135,4 +170,7 @@ export default {
   leaveGame,
   findHostId,
   getShuffledCards,
+  createCardsHeldForPlayer,
+  getCardsHeldForPlayer,
+  getAllGames,
 };

@@ -5,8 +5,6 @@ import { Server } from "socket.io";
 
 const router = express.Router();
 
-// i think i fixed the errro just look at terminal error now
-
 router.post("/create", async (request: Request, response: Response) => {
   // @ts-ignore
   const { user_id: userId, email, gravatar } = request.session.user;
@@ -23,17 +21,9 @@ router.post("/create", async (request: Request, response: Response) => {
     );
     if (gameId) {
       const io = request.app.get<Server>("io");
-      io.emit("game:created", {
-        gameId,
-        gameName: gameName ?? `Game ${gameId}`,
-        gameMinPlayers,
-        gameMaxPlayers,
-        hasPassword: gamePassword !== undefined,
-        host: {
-          user_id: userId,
-          email,
-          gravatar,
-        },
+      const allGames = await Game.getAllGames();
+      io.emit("game:getGames", {
+        allGames,
       });
       response.redirect(`/games/${gameId}`);
     } else {
@@ -42,8 +32,6 @@ router.post("/create", async (request: Request, response: Response) => {
   } catch (err) {
     console.error("error creating game: ", err);
     response.status(500).send("error creating game");
-
-    // add join game form
   }
 });
 
@@ -114,9 +102,8 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     });
     return;
   }
-  // for the start game, what needs to happen?
-  // get and shuffle cards? then start rotation?
 
+  // TODO
   // shuffle deck, create each cardsHeld for each player from that shuffledCards array
   // create flop, turn, river arrays/variables to send to client maybe?
   // assign rotations and set the active player

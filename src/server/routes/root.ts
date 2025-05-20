@@ -1,7 +1,8 @@
-// src/server/routes/root.ts
-import express from "express";
+import express, { Request, Response } from "express";
 import User from "../db/models/user";
 import db from "../db/connection";
+import { Game } from "../db";
+import { Server } from "socket.io";
 
 const router = express.Router();
 const userModel = new User(db);
@@ -23,7 +24,7 @@ const friendRequests = async (userId: number) => {
 };
 
 // Home page
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     let user = null;
     if (req.session.userId) {
@@ -38,6 +39,14 @@ router.get("/", async (req, res) => {
       const requests = await friendRequests(req.session.userId);
       user.requests = requests;
     }
+
+    const io = req.app.get<Server>("io");
+    const allGames = await Game.getAllGames();
+    io.on("connection", (socket) => {
+      socket.emit("game:getGames", {
+        allGames,
+      });
+    });
 
     res.render("root", {
       title: "Poker Game",

@@ -71,7 +71,7 @@
     <!-- Game List -->
     <section style="flex: 2;">
       <h2>Games</h2>
-      <div style="height: 300px; overflow-y: auto; border: 1px solid black; padding: 10px;">
+      <div id="games-list-container">
         <!-- Games go here-->
       </div>
     </section>
@@ -80,13 +80,8 @@
     <section style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
       <button>Add Funds</button>
       <button>Cash Out</button>
-      <!-- <form action="/games/join" method="post">
-        <input type="hidden" name="gameId" value="6"/>
-        <button type="submit">Join</button>
-      </form> -->
       <button id="show-join-form">Join an existing game</button>
       <%- include('shared/join-game') %> 
-
       <button id="show-create-form">Create a new game</button>
     </section>
 
