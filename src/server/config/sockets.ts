@@ -24,6 +24,12 @@ const configureSockets = (io: Server, app: Express) => {
     // @ts-ignore
     const { id, user, game_id } = socket.request.session;
 
+    if (!user) {
+      console.warn("Socket connected without user in session");
+      socket.disconnect();
+      return;
+    }
+
     console.log(
       `User [${user.user_id}] connected: ${user.email} with session id ${id}`,
     );

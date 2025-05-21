@@ -71,6 +71,7 @@ router.post("/signup", function (req, res) {
 router.post("/signin", function (req, res) {
   (async () => {
     try {
+      console.log("Signin route accessed");
       const { email, password } = req.body;
 
       // Validate inputs

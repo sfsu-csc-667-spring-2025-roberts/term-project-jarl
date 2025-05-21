@@ -1,17 +1,17 @@
+// src/server/routes/friends.ts
 import db from "../db/connection";
 import express from "express";
+import { Request, Response } from "express";
+import { Friends } from "../db";
 
 const router = express.Router();
 
-const SEND_SQL = `INSERT INTO "userFriends" (user_id, friend_id, status) VALUES ($1, $2, 'pending')`;
-const APPROVE_SQL = `UPDATE "userFriends" SET status = 'accepted' WHERE user_id = $1 AND friend_id = $2`;
-const DELETE_SQL = `DELETE FROM "userFriends" WHERE (user_id = $1 AND friend_id = $2)`;
-const ACCEPT_SQL = `INSERT INTO "userFriends" (user_id, friend_id, status) VALUES ($1, $2, 'accepted') ON CONFLICT (user_id, friend_id) DO UPDATE SET status = 'accepted'`;
-
 // @ts-ignore
-router.post("/send", async (req, res) => {
-  const userId = req.session.userId;
-  const { friendId } = req.body;
+router.post("/send", async (req: Request, res: Response) => {
+  // Type assertion for session
+  const session = req.session as any;
+  const userId = session.userId;
+  let { friendId } = req.body;
 
   if (!userId || !friendId) {
     return res
@@ -26,31 +26,38 @@ router.post("/send", async (req, res) => {
   }
 
   try {
-    // Check if a friend request already exists
-    const existingRequest = await db.query(
-      `SELECT * FROM "userFriends" WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`,
-      [userId, friendId],
-    );
+    const friends = new Friends(db);
 
-    if (existingRequest.length > 0) {
-      return res.status(400).json({
-        error: "Friend request already exists or you are already friends",
-      });
+    if (!isNaN(Number(friendId))) {
+      friendId = Number(friendId);
+
+      const existingRequest = await friends.existingRequests(userId, friendId);
+
+      if (existingRequest.length > 0) {
+        return res.status(400).json({
+          error: "Friend request already exists or you are already friends",
+        });
+      }
     }
 
     // Insert the friend request
-    await db.query(SEND_SQL, [userId, friendId]);
-    res.status(200).json({ message: "Friend request sent" });
+    await friends.sendFriendRequest(userId, friendId);
+    const friendName = await friends.getFriendRequestName(userId, friendId);
+    return res.status(200).json({
+      message: "Friend request sent",
+      friend_id: friendId,
+      username: friendName,
+    });
   } catch (error) {
     console.error("Error sending friend request:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // @ts-ignore
-router.post("/reject", async (req, res) => {
-  console.log("Received request to reject friend request:");
-  const userId = req.session.userId;
+router.post("/reject", async (req: Request, res: Response) => {
+  const session = req.session as any;
+  const userId = session.userId;
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
@@ -60,20 +67,32 @@ router.post("/reject", async (req, res) => {
   }
 
   try {
-    await db.query(DELETE_SQL, [userId, Number(friendId)]);
-    await db.query(DELETE_SQL, [Number(friendId), userId]);
-    res.status(200).json({ message: "Friend request rejected" });
+    const friends = new Friends(db);
+
+    const existingRequest = await friends.existingRequests(
+      userId,
+      Number(friendId),
+    );
+    if (existingRequest.length === 0) {
+      return res.status(400).json({ error: "No friend request found" });
+    }
+
+    await friends.deleteFriendRequest(userId, Number(friendId));
+    await friends.deleteFriendRequest(Number(friendId), userId);
+
+    return res.status(200).json({ message: "Friend request rejected" });
   } catch (error) {
     console.error("Error rejecting friend request:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // @ts-ignore
-router.post("/accept", async (req, res) => {
-  console.log("Recieved request to accept friend request");
-
-  const userId = req.session.userId;
+router.post("/accept", async (req: Request, res: Response) => {
+  console.log("Received request to accept friend request");
+  // Type assertion for session
+  const session = req.session as any;
+  const userId = session.userId;
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
@@ -83,18 +102,35 @@ router.post("/accept", async (req, res) => {
   }
 
   try {
-    await db.query(ACCEPT_SQL, [userId, Number(friendId)]);
-    await db.query(APPROVE_SQL, [Number(friendId), userId]);
-    res.status(200).json({ message: "Friend request accepted" });
+    const friends = new Friends(db);
+
+    const existingRequest = await friends.existingRequests(
+      userId,
+      Number(friendId),
+    );
+    if (existingRequest.length === 0) {
+      return res.status(400).json({ error: "No friend request found" });
+    }
+
+    if (existingRequest[0].status === "accepted") {
+      return res.status(400).json({ error: "Friend request already accepted" });
+    }
+
+    await friends.acceptFriendRequest(userId, Number(friendId));
+    await friends.approveFriendRequest(Number(friendId), userId);
+
+    return res.status(200).json({ message: "Friend request accepted" });
   } catch (error) {
     console.error("Error accepting friend request:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // @ts-ignore
-router.post("/remove", async (req, res) => {
-  const userId = req.session.userId;
+router.post("/remove", async (req: Request, res: Response) => {
+  // Type assertion for session
+  const session = req.session as any;
+  const userId = session.userId;
   const { friendId } = req.body;
 
   if (!userId || !friendId) {
@@ -104,12 +140,23 @@ router.post("/remove", async (req, res) => {
   }
 
   try {
-    await db.query(DELETE_SQL, [userId, Number(friendId)]);
-    await db.query(DELETE_SQL, [Number(friendId), userId]);
-    res.status(200).json({ message: "Friend removed" });
+    const friends = new Friends(db);
+
+    const existingRequest = await friends.existingRequests(
+      userId,
+      Number(friendId),
+    );
+    if (existingRequest.length === 0) {
+      return res.status(400).json({ error: "No friend request found" });
+    }
+
+    await friends.deleteFriendRequest(userId, Number(friendId));
+    await friends.deleteFriendRequest(Number(friendId), userId);
+
+    return res.status(200).json({ message: "Friend removed" });
   } catch (error) {
     console.error("Error removing friend:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
