@@ -38,14 +38,15 @@ router.get("/", async (req: Request, res: Response) => {
       user.friends = friends;
       const requests = await friendRequests(req.session.userId);
       user.requests = requests;
-    }
-    const io = req.app.get<Server>("io");
-    const allGames = await Game.getAllGames();
-    io.on("connection", (socket) => {
-      socket.emit("game:getGames", {
-        allGames,
+
+      const io = req.app.get<Server>("io");
+      const allGames = await Game.getAllGames();
+      io.on("connection", (socket) => {
+        socket.emit("game:getGames", {
+          allGames,
+        });
       });
-    });
+    }
 
     res.render("root", {
       title: "Poker Game",
