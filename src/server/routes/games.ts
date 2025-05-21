@@ -108,6 +108,7 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
   // create flop, turn, river arrays/variables to send to client maybe?
   // assign rotations and set the active player
   // broadcast state update with order of cards to client maybe
+  // gameCards table is for the dealer's hand in each game
   console.log("started game");
   const shuffledCards = await Game.getShuffledCards();
   console.log("shuffled cards");

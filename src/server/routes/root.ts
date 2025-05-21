@@ -39,7 +39,6 @@ router.get("/", async (req: Request, res: Response) => {
       const requests = await friendRequests(req.session.userId);
       user.requests = requests;
     }
-
     const io = req.app.get<Server>("io");
     const allGames = await Game.getAllGames();
     io.on("connection", (socket) => {

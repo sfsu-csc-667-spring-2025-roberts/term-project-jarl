@@ -24,51 +24,55 @@ const configureSockets = (io: Server, app: Express) => {
     // @ts-ignore
     const { id, user, game_id } = socket.request.session;
 
-    console.log(
-      `User [${user.user_id}] connected: ${user.email} with session id ${id}`,
-    );
-    socket.join(user.id);
+    if (user) {
+      console.log(
+        `User [${user.user_id}] connected: ${user.email} with session id ${id}`,
+      );
+      socket.join(user.id);
 
-    // testing purposes
-    // sendOneCardToClient(socket);
+      // testing purposes
+      // sendOneCardToClient(socket);
 
-    socket.on("gameChatMessage", async (message: string) => {
-      try {
-        await db.none(
-          `
-          INSERT INTO messages (content, author, game_player_id, "isLobby")
-          VALUES (
-            $1,
-            $2,
-            (
-              SELECT game_player_id
-              FROM "gamePlayers"
-              WHERE user_id = $2 AND game_id = $3
-            ),
-            false
-          )
-        `,
-          [message, user.user_id, game_id],
-        );
+      socket.on("gameChatMessage", async (message: string) => {
+        try {
+          await db.none(
+            `
+            INSERT INTO messages (content, author, game_player_id, "isLobby")
+            VALUES (
+              $1,
+              $2,
+              (
+                SELECT game_player_id
+                FROM "gamePlayers"
+                WHERE user_id = $2 AND game_id = $3
+              ),
+              false
+            )
+          `,
+            [message, user.user_id, game_id],
+          );
 
-        const userResult = await db.one(
-          "SELECT username FROM users WHERE user_id = $1",
-          [user.user_id],
-        );
+          const userResult = await db.one(
+            "SELECT username FROM users WHERE user_id = $1",
+            [user.user_id],
+          );
 
-        io.emit("gameChatMessage", {
-          user: userResult.username,
-          content: message,
-        });
-      } catch (err) {
-        console.error("Error handling game chat message:", err);
-      }
-    });
+          io.emit("gameChatMessage", {
+            user: userResult.username,
+            content: message,
+          });
+        } catch (err) {
+          console.error("Error handling game chat message:", err);
+        }
+      });
+    }
 
     socket.on("disconnect", () => {
-      console.log(
-        `User [${user.user_id}] disconnected: ${user.email} with session id ${id}`,
-      );
+      if (user) {
+        console.log(
+          `User [${user.user_id}] disconnected: ${user.email} with session id ${id}`,
+        );
+      }
     });
   });
 };

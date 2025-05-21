@@ -68,7 +68,10 @@ socket.on(`game:${gameId}:player-joined`, (data) => {
 
 startGameButton!.addEventListener("click", (e) => {
   e.preventDefault();
-
+  if (startGameButton!.disabled) {
+    return;
+  }
+  console.log("sstart game btn clicked");
   startGameButton!.disabled = true;
 
   fetch(`/games/${gameId}/start`, {
@@ -77,7 +80,7 @@ startGameButton!.addEventListener("click", (e) => {
     .then((response) => {
       if (response.ok) {
         console.log("started game in client");
-        startGameButton!.parentNode?.removeChild(startGameButton!);
+        // startGameButton!.parentNode?.removeChild(startGameButton!);
       } else {
         console.error("Failed to start game");
         startGameButton!.disabled = false;

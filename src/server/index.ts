@@ -167,8 +167,8 @@ app.use("/friends", middleware.auth, routes.friends);
 app.use("/games", middleware.auth, routes.games);
 
 server.listen(3000, () => {
-  console.log(`Server is running on port 3000}`);
-  console.log(`Socket.IO server is running on port 3000}`);
+  console.log(`Server is running on port 3000`);
+  console.log(`Socket.IO server is running on port 3000`);
 });
 // app.use((_request, _response, next) => {
 //   next(httpErrors(404));
