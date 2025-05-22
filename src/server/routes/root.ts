@@ -49,24 +49,23 @@ router.get("/", async (req: Request, res: Response) => {
           allGames,
         });
       });
+      const funds = await userModel.getFunds(user.user_id);
+
+      lobbyMessages = await getLobbyMessages();
+
+      res.render("root", {
+        title: "Poker Game",
+        user,
+        friends: user ? user.friends : [],
+        requests: user ? user.requests : [],
+        lobbyMessages: lobbyMessages, // Pass messages to template
+        funds: funds ? funds.funds : 0,
+      });
     }
 
     if (!user) {
       return res.redirect("/signin");
     }
-
-    const funds = await userModel.getFunds(user.user_id);
-
-    lobbyMessages = await getLobbyMessages();
-
-    res.render("root", {
-      title: "Poker Game",
-      user,
-      friends: user ? user.friends : [],
-      requests: user ? user.requests : [],
-      lobbyMessages: lobbyMessages, // Pass messages to template
-      funds: funds ? funds.funds : 0,
-    });
   } catch (error) {
     console.error("Home page error:", error);
     res.render("root", {
