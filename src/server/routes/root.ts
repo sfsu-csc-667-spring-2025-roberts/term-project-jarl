@@ -39,10 +39,6 @@ router.get("/", async (req: Request, res: Response) => {
     if (req.session.userId) {
       user = await userModel.findById(req.session.userId);
 
-      if (!user) {
-        return res.redirect("/signin");
-      }
-
       user.friends = await friendsModel.getFriends(req.session.userId);
       user.requests = await friendsModel.getFriendRequests(req.session.userId);
 
@@ -56,8 +52,9 @@ router.get("/", async (req: Request, res: Response) => {
     }
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.redirect("/signin");
     }
+
     const funds = await userModel.getFunds(user.user_id);
 
     lobbyMessages = await getLobbyMessages();

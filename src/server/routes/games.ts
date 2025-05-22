@@ -134,13 +134,13 @@ router.post("/:gameId/bet", async (request: Request, response: Response) => {
     gameId,
   ]);
 
-  rotationLogic(
-    parseInt(gameId),
-    parseInt(userId),
-    parseInt(betAmount),
-    request,
-    response,
-  );
+  // rotationLogic(
+  //   parseInt(gameId),
+  //   parseInt(userId),
+  //   parseInt(betAmount),
+  //   request,
+  //   response,
+  // );
 
   response
     .status(200)
