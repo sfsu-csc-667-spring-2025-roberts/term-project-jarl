@@ -162,6 +162,7 @@ chatForm.addEventListener("submit", (e) => {
 
 // When a chat message is received from the server
 socket.on("gameChatMessage", (data: { user: string; content: string }) => {
+  console.log("Chat message received:", data);
   const messageDiv = document.createElement("div");
   messageDiv.className = "chat-message";
   messageDiv.innerHTML = `<strong>${data.user}</strong>: ${data.content}`;

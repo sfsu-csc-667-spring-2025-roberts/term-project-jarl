@@ -27,18 +27,17 @@ const friendRequests = async (userId: number) => {
 const getLobbyMessages = async () => {
   try {
     const messages = await db.any(
-      `SELECT m.content, m.author, m.created_at, u.user_id as sender_id
+      `SELECT m.content, m.author, m.created_at, u.user_id as sender_id, u.username
        FROM messages m
-       JOIN users u ON m.author = u.user_id
+       FULL JOIN users u ON m.author = u.user_id
        WHERE m."isLobby" = true
        ORDER BY m.created_at ASC`,
     );
-    
     // Format messages to match the frontend expectation
-    return messages.map(msg => ({
+    return messages.map((msg) => ({
       message: msg.content,
-      sender: msg.author, // or msg.sender_id if you want to use user_id
-      timestamp: new Date(msg.created_at).getTime()
+      sender: msg.username, // or msg.sender_id if you want to use user_id
+      timestamp: new Date(msg.created_at).getTime(),
     }));
   } catch (error) {
     console.error("Error fetching lobby messages:", error);
@@ -51,7 +50,7 @@ router.get("/", async (req: Request, res: Response) => {
   try {
     let user = null;
     let lobbyMessages = [];
-    
+
     if (req.session.userId) {
       user = await userModel.findById(req.session.userId);
 
