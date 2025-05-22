@@ -31,11 +31,9 @@ router.post("/", async (req, res) => {
     );
 
     if (existingRequest.length > 0) {
-      return res
-        .status(400)
-        .json({
-          error: "Friend request already exists or you are already friends",
-        });
+      return res.status(400).json({
+        error: "Friend request already exists or you are already friends",
+      });
     }
 
     // Insert the friend request

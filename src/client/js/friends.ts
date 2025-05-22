@@ -26,6 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
           // Clear the input field
           friendIdInput.value = "";
 
+          // Use the friend_id and username returned by the server
+          const { friend_id, username } = result;
+
           // Dynamically add the friend request to the friends list
           const friendsListContainer = document.querySelector(
             'div[style*="height: 100px"]',
@@ -37,9 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
             newFriendRequest.style.padding = "5px";
 
             newFriendRequest.innerHTML = `
-                            <span>${friendId}</span>
-                            <button type="button" class="remove-friend" data-id="${friendId}">Pending</button>
-                        `;
+              <span>${username}#${friend_id}</span>
+              <button type="button" class="remove-friend" data-id="${friend_id}">Pending</button>
+            `;
 
             friendsListContainer.appendChild(newFriendRequest);
 
@@ -57,11 +60,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ friendId }),
+                    body: JSON.stringify({ friendId: friend_id }),
                   });
 
                   if (removeResponse.ok) {
-                    alert("Friend removed successfully!");
                     newFriendRequest.remove(); // Remove the friend entry from the DOM
                   } else {
                     alert("Error removing friend.");

@@ -28,25 +28,47 @@ router.post("/send", async (req: Request, res: Response) => {
   try {
     const friends = new Friends(db);
 
-    if (!isNaN(Number(friendId))) {
-      friendId = Number(friendId);
+    let friendUserId = Number(friendId);
+    let friendUsername = friendId;
+    if (isNaN(friendUserId)) {
+      const user = await db.oneOrNone(
+        `SELECT user_id, username FROM "users" WHERE username = $1`,
+        [friendId],
+      );
 
-      const existingRequest = await friends.existingRequests(userId, friendId);
-
-      if (existingRequest.length > 0) {
-        return res.status(400).json({
-          error: "Friend request already exists or you are already friends",
-        });
+      if (!user) {
+        return res.status(400).json({ error: "User not found" });
       }
+      friendUserId = user.user_id;
+      friendUsername = user.username;
+    } else {
+      const user = await db.oneOrNone(
+        `SELECT username FROM "users" WHERE user_id = $1`,
+        [friendUserId],
+      );
+      if (!user) {
+        return res.status(400).json({ error: "User not found" });
+      }
+      friendUsername = user.username;
+    }
+
+    const existingRequest = await friends.existingRequests(
+      userId,
+      friendUserId,
+    );
+    if (existingRequest.length > 0) {
+      return res.status(400).json({
+        error: "Friend request already exists or you are already friends",
+      });
     }
 
     // Insert the friend request
-    await friends.sendFriendRequest(userId, friendId);
-    const friendName = await friends.getFriendRequestName(userId, friendId);
+    await friends.sendFriendRequest(userId, friendUserId);
+
     return res.status(200).json({
       message: "Friend request sent",
-      friend_id: friendId,
-      username: friendName,
+      friend_id: friendUserId,
+      username: friendUsername,
     });
   } catch (error) {
     console.error("Error sending friend request:", error);

@@ -6,8 +6,8 @@ const APPROVE_SQL = `UPDATE "userFriends" SET status = 'accepted' WHERE user_id 
 const DELETE_SQL = `DELETE FROM "userFriends" WHERE (user_id = $1 AND friend_id = $2)`;
 const ACCEPT_SQL = `INSERT INTO "userFriends" (user_id, friend_id, status) VALUES ($1, $2, 'accepted') ON CONFLICT (user_id, friend_id) DO UPDATE SET status = 'accepted'`;
 const EXISTING_REQUESTS_SQL = `SELECT * FROM "userFriends" WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`;
-const GET_FRIEND_REQUEST_NAME_SQL =
-  'SELECT username FROM "users" WHERE user_id = $1 AND friend_id = $2';
+const GET_USER_FROM_ID_SQL = `SELECT username, user_id FROM "users" WHERE user_id = $2`;
+const GET_USER_FROM_USERNAME_SQL = `SELECT username, user_id FROM "users" WHERE username = $2`;
 
 class Friends {
   private db: pgPromise.IDatabase<any>;
@@ -61,7 +61,11 @@ class Friends {
   }
 
   async getFriendRequestName(userId: number, friendId: number) {
-    return this.db.any(GET_FRIEND_REQUEST_NAME_SQL, [userId, friendId]);
+    const isUserId = typeof friendId === "number";
+
+    const query = isUserId ? GET_USER_FROM_ID_SQL : GET_USER_FROM_USERNAME_SQL;
+
+    return this.db.any(query, [userId, friendId]);
   }
 }
 

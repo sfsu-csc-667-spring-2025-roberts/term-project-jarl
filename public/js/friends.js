@@ -146,6 +146,8 @@ document.addEventListener("DOMContentLoaded", function () {
           friendId,
           response,
           result,
+          friend_id_1,
+          username,
           friendsListContainer,
           newFriendRequest_1,
           removeButton,
@@ -181,6 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
               if (response.ok) {
                 // Clear the input field
                 friendIdInput.value = "";
+                (friend_id_1 = result.friend_id), (username = result.username);
                 friendsListContainer = document.querySelector(
                   'div[style*="height: 100px"]',
                 );
@@ -189,16 +192,13 @@ document.addEventListener("DOMContentLoaded", function () {
                   newFriendRequest_1.style.display = "flex";
                   newFriendRequest_1.style.justifyContent = "space-between";
                   newFriendRequest_1.style.padding = "5px";
-                  newFriendRequest_1.innerHTML =
-                    "\n                            <span>"
-                      .concat(
-                        friendId,
-                        '</span>\n                            <button type="button" class="remove-friend" data-id="',
-                      )
-                      .concat(
-                        friendId,
-                        '">Pending</button>\n                        ',
-                      );
+                  newFriendRequest_1.innerHTML = "\n              <span>"
+                    .concat(username, "#")
+                    .concat(
+                      friend_id_1,
+                      '</span>\n              <button type="button" class="remove-friend" data-id="',
+                    )
+                    .concat(friend_id_1, '">Pending</button>\n            ');
                   friendsListContainer.appendChild(newFriendRequest_1);
                   removeButton =
                     newFriendRequest_1.querySelector(".remove-friend");
@@ -220,13 +220,14 @@ document.addEventListener("DOMContentLoaded", function () {
                                   headers: {
                                     "Content-Type": "application/json",
                                   },
-                                  body: JSON.stringify({ friendId: friendId }),
+                                  body: JSON.stringify({
+                                    friendId: friend_id_1,
+                                  }),
                                 }),
                               ];
                             case 2:
                               removeResponse = _a.sent();
                               if (removeResponse.ok) {
-                                alert("Friend removed successfully!");
                                 newFriendRequest_1.remove(); // Remove the friend entry from the DOM
                               } else {
                                 alert("Error removing friend.");
