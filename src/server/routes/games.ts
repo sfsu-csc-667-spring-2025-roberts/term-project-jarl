@@ -2,6 +2,8 @@ import express from "express";
 import { Request, Response } from "express";
 import { Game } from "../db";
 import { Server } from "socket.io";
+import db from "../db/connection";
+import { rotationLogic } from "../db/games/gameLogic";
 
 const router = express.Router();
 
@@ -103,21 +105,63 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     return;
   }
 
-  // TODO
-  // shuffle deck, create each cardsHeld for each player from that shuffledCards array
-  // create flop, turn, river arrays/variables to send to client maybe?
-  // assign rotations and set the active player
-  // broadcast state update with order of cards to client maybe
-  // gameCards table is for the dealer's hand in each game
-  console.log("started game");
-  const shuffledCards = await Game.getShuffledCards();
-  console.log("shuffled cards");
-  console.log(shuffledCards);
-
   io.emit(`game:${gameId}:start:success`, {
     message: "Game started successfully",
   });
   response.status(200).send("Game started successfully");
+});
+
+// create routes for betting (updating potSize in game and updating turn in game)
+router.post("/:gameId/bet", async (request: Request, response: Response) => {
+  const { gameId } = request.params;
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+  const { betAmount } = request.body;
+  const currGame = await db.one(`SELECT * FROM games WHERE game_id = $1`, [
+    gameId,
+  ]);
+
+  rotationLogic(
+    parseInt(gameId),
+    parseInt(userId),
+    parseInt(betAmount),
+    request,
+    response,
+  );
+
+  response
+    .status(200)
+    .json({ message: `Bet of ${betAmount} placed successfully` });
+});
+
+router.post("/:gameId/fold", async (request: Request, response: Response) => {
+  const { gameId } = request.params;
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+  const players = await db.many(
+    `SELECT * FROM "gamePlayers" WHERE game_id = $1`,
+    [gameId],
+  );
+  const currGame = await db.one(`SELECT * FROM games WHERE game_id = $1`, [
+    gameId,
+  ]);
+  await db.none(
+    `
+    UPDATE "gamePlayers"
+    SET isPlaying = false
+    WHERE game_id = $1 AND user_id = $2
+  `,
+    [gameId, userId],
+  );
+
+  const io = request.app.get<Server>("io");
+  io.on("connection", (socket) => {
+    socket.emit(`game:${gameId}:fold`, {
+      userId,
+      gameId,
+      nextPlayer: players[currGame.turn],
+    });
+  });
 });
 
 export default router;
