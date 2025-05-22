@@ -19,7 +19,7 @@ router.post("/global", async (req, res) => {
 
   const broadcastMessage = {
     message,
-    sender: user?.user_id,
+    sender: user?.username,
     timestamp,
   };
 

@@ -74,11 +74,14 @@
       <div id="games-list-container">
         <!-- Games go here-->
       </div>
+      <div id="funds-container">You currently have $<%=funds%> funds </div>
+
     </section>
 
     <!-- Actions, need to link them to the correct routes -->
     <section style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
-      <button>Add Funds</button>
+      <button id="add-funds-button">Add Funds</button>
+      <%- include('shared/add-funds') %> 
       <button>Cash Out</button>
       <button id="show-join-form">Join an existing game</button>
       <%- include('shared/join-game') %> 
@@ -128,7 +131,16 @@
         <h3>Global Chat</h3>
       
         <div id="chat-messages" style="height: 300px; overflow-y: auto; border: 1px solid black; background: #f9f9f9; padding: 5px;">
-          <!-- Messages will appear here -->
+          <!-- Display existing messages from database -->
+          <% if (locals.lobbyMessages && locals.lobbyMessages.length > 0) { %>
+            <% for (let i = 0; i < locals.lobbyMessages.length; i++) { %>
+              <div style="margin-bottom: 8px;">
+                <strong><%= locals.lobbyMessages[i].sender %></strong>: <%= locals.lobbyMessages[i].message %>
+                <div style="font-size: 0.75em; color: gray;"><%= new Date(locals.lobbyMessages[i].timestamp).toLocaleTimeString() %></div>
+              </div>
+            <% } %>
+          <% } %>
+          <!-- New messages will be appended here via Socket.IO -->
         </div>
       
         <!-- <form id="global-chat-form" method="POST" action="/chat/global" style="display: flex; gap: 5px; margin-top: 10px;"> -->
@@ -202,12 +214,15 @@
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
     });
-  </script>
 
-  
-  
-  
-  
+    // Auto-scroll to bottom on page load if there are existing messages
+    window.addEventListener('load', () => {
+      const chatBox = document.getElementById("chat-messages");
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    });
+  </script>
 
 </body>
 </html>

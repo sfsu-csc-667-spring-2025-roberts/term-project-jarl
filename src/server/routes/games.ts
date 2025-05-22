@@ -141,4 +141,57 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
   response.status(200).send("Game started successfully");
 });
 
+// create routes for betting (updating potSize in game and updating turn in game)
+router.post("/:gameId/bet", async (request: Request, response: Response) => {
+  const { gameId } = request.params;
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+  const { betAmount } = request.body;
+  const currGame = await db.one(`SELECT * FROM games WHERE game_id = $1`, [
+    gameId,
+  ]);
+
+  // rotationLogic(
+  //   parseInt(gameId),
+  //   parseInt(userId),
+  //   parseInt(betAmount),
+  //   request,
+  //   response,
+  // );
+
+  response
+    .status(200)
+    .json({ message: `Bet of ${betAmount} placed successfully` });
+});
+
+router.post("/:gameId/fold", async (request: Request, response: Response) => {
+  const { gameId } = request.params;
+  // @ts-ignore
+  const { user_id: userId } = request.session.user;
+  const players = await db.many(
+    `SELECT * FROM "gamePlayers" WHERE game_id = $1`,
+    [gameId],
+  );
+  const currGame = await db.one(`SELECT * FROM games WHERE game_id = $1`, [
+    gameId,
+  ]);
+  await db.none(
+    `
+    UPDATE "gamePlayers"
+    SET isPlaying = false
+    WHERE game_id = $1 AND user_id = $2
+  `,
+    [gameId, userId],
+  );
+
+  const io = request.app.get<Server>("io");
+  io.on("connection", (socket) => {
+    socket.emit(`game:${gameId}:fold`, {
+      userId,
+      gameId,
+      nextPlayer: players[currGame.turn],
+    });
+  });
+});
+
 export default router;

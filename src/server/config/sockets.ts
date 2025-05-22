@@ -42,18 +42,18 @@ const configureSockets = (io: Server, app: Express) => {
       try {
         await db.none(
           `
-          INSERT INTO messages (content, author, game_player_id, "isLobby")
-          VALUES (
-            $1,
-            $2,
-            (
-              SELECT game_player_id
-              FROM "gamePlayers"
-              WHERE user_id = $2 AND game_id = $3
-            ),
-            false
-          )
-        `,
+            INSERT INTO messages (content, author, game_player_id, "isLobby")
+            VALUES (
+              $1,
+              $2,
+              (
+                SELECT game_player_id
+                FROM "gamePlayers"
+                WHERE user_id = $2 AND game_id = $3
+              ),
+              false
+            )
+          `,
           [message, user.user_id, game_id],
         );
 
@@ -72,9 +72,11 @@ const configureSockets = (io: Server, app: Express) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(
-        `User [${user.user_id}] disconnected: ${user.email} with session id ${id}`,
-      );
+      if (user) {
+        console.log(
+          `User [${user.user_id}] disconnected: ${user.email} with session id ${id}`,
+        );
+      }
     });
   });
 };

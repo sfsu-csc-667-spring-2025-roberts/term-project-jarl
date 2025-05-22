@@ -17,11 +17,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       references: '"users"',
       onDelete: "CASCADE",
     },
-    seat: {
-      type: "serial",
-      notNull: true,
-    },
-    is_current: {
+    is_playing: {
       type: "boolean",
       notNull: true,
       default: false,
