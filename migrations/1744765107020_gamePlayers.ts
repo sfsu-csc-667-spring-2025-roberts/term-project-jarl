@@ -61,6 +61,11 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       notNull: true,
       default: false,
     },
+    stack: {
+      type: "float",
+      notNull: true,
+      default: 0,
+    },
   });
 }
 

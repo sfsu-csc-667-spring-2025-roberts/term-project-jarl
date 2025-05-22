@@ -1,7 +1,8 @@
 import express from "express";
 import { Request, Response } from "express";
-import { Game } from "../db";
+import { Game, GameState } from "../db";
 import { Server } from "socket.io";
+import db from "../db/connection";
 
 const router = express.Router();
 
@@ -108,7 +109,11 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
   // create flop, turn, river arrays/variables to send to client maybe?
   // assign rotations and set the active player
   // broadcast state update with order of cards to client maybe
-  console.log("started game");
+
+  const gameState = new GameState(db, 4);
+  await gameState.createGameState(parseInt(gameId));
+  console.log("started game: ", gameId);
+
   const shuffledCards = await Game.getShuffledCards();
   console.log("shuffled cards");
   console.log(shuffledCards);

@@ -11,8 +11,9 @@
     "frontend:dev": "webpack --config webpack.config.ts --mode development --watch",
     "prepare": "husky",
     "db:create": "node-pg-migrate create -j ts --",
-    "db:migrate1": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js up -j ts -d postgres --migration-file-language ts --migration-table pgmigrations --migration-schema public",
+    "db:migrate1": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js up -j ts -d spring-2025 --migration-file-language ts --migration-table pgmigrations --migration-schema public",
     "db:migrate": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js up -j ts",
+    "db:rollback1": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js down -j ts -d spring-2025 --migration-file-language ts --migration-table pgmigrations --migration-schema public",
    "db:rollback": "ts-node node_modules/node-pg-migrate/bin/node-pg-migrate.js down -j ts",
     "build": "tsc src/client/js/friends.ts --outDir public/js",
     "lint": "prettier --write ./src"

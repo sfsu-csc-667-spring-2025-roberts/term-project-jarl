@@ -165,6 +165,7 @@ app.use("/chat", middleware.auth, routes.chat);
 app.use("/lobby", middleware.auth, routes.lobby);
 app.use("/friends", middleware.auth, routes.friends);
 app.use("/games", middleware.auth, routes.games);
+app.use("/actions", middleware.auth, routes.actions);
 
 server.listen(3000, () => {
   console.log(`Server is running on port 3000}`);
