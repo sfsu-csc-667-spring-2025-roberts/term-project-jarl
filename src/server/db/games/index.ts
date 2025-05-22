@@ -117,7 +117,7 @@ const findHostId = async (gameId: number) => {
 };
 
 const getShuffledCards = async () => {
-  const cards = await db.many(
+  const cards = await db.manyOrNone(
     `
     SELECT *
     FROM cards
@@ -151,14 +151,14 @@ const createCardsHeldForPlayer = async (
 };
 
 const getCardsHeldForPlayer = async (gamePlayerId: number) => {
-  const cardsHeld = await db.many(GET_CARDS_HELD_SQL, [gamePlayerId]);
+  const cardsHeld = await db.manyOrNone(GET_CARDS_HELD_SQL, [gamePlayerId]);
   return cardsHeld;
 };
 
 const GET_ALL_GAMES_SQL = `SELECT game_id, password FROM games ORDER BY game_id DESC`;
 
 const getAllGames = async () => {
-  const games = await db.many(GET_ALL_GAMES_SQL);
+  const games = await db.manyOrNone(GET_ALL_GAMES_SQL);
   return games;
 };
 

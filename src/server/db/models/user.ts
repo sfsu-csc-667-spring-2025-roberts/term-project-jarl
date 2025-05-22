@@ -63,6 +63,19 @@ class User {
       token,
     ]);
   }
+
+  async getFunds(userId: number) {
+    return this.db.oneOrNone("SELECT funds FROM users WHERE user_id = $1", [
+      userId,
+    ]);
+  }
+
+  async addFunds(userId: number, amount: number) {
+    return this.db.one(
+      "UPDATE users SET funds = funds + $1 WHERE user_id = $2 RETURNING funds",
+      [amount, userId],
+    );
+  }
 }
 
 export default User;

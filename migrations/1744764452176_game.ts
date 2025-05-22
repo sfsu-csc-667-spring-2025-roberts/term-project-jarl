@@ -20,6 +20,26 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       type: "varchar(255)",
       notNull: false,
     },
+    turn: {
+      type: "integer",
+      notNull: true,
+      default: 0,
+    },
+    pot_size: {
+      type: "float",
+      notNull: true,
+      default: 0,
+    },
+    min_bet: {
+      type: "float",
+      notNull: true,
+      default: 0,
+    },
+    round: {
+      type: "integer",
+      notNull: true,
+      default: 0,
+    },
   });
 }
 

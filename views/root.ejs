@@ -33,7 +33,11 @@
 
   <%# include lobby page if user is logged in %>
   <% if (locals.user) { %>
-    <%- include('./lobby', { friends: locals.friends, requests: locals.requests }) %>
+    <%- include('./lobby', { 
+      friends: locals.friends, 
+      requests: locals.requests,
+      lobbyMessages: locals.lobbyMessages || []
+    }) %>
   <% } %>
   
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
