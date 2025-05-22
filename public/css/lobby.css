@@ -1,5 +1,6 @@
 div#create-game-container,
-div#join-game-container {
+div#join-game-container,
+div#add-funds-modal {
   position: absolute;
   top: 0;
   left: 0;
@@ -12,12 +13,14 @@ div#join-game-container {
 }
 
 div#join-game-container.hidden,
-div#create-game-container.hidden {
+div#create-game-container.hidden,
+div#add-funds-modal.hidden {
   display: none;
 }
 
 div#create-game-container form,
-div#join-game-container form {
+div#join-game-container form,
+div#add-funds-modal form {
   width: 500px;
   margin: 0 auto;
   background-color: white;
@@ -25,6 +28,9 @@ div#join-game-container form {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   position: relative;
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 div#create-game-container form div,
@@ -39,7 +45,8 @@ div#create-game-container form div label {
 }
 
 div#create-game-container form div > input,
-div#join-game-container form div > input {
+div#join-game-container form div > input,
+div#add-funds-modal form div > input {
   flex-grow: 1;
   padding: 5px;
   /* add font-size:  */
@@ -63,7 +70,8 @@ a#show-create-form {
 }
 
 div#create-game-container form a#hide-create-form,
-div#join-game-container form a#hide-join-form {
+div#join-game-container form a#hide-join-form,
+div#add-funds-modal form a#hide-add-funds-modal {
   text-decoration: none;
   font-size: large;
   position: absolute;

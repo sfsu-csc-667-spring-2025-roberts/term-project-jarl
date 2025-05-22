@@ -72,7 +72,11 @@ router.get("/", async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch lobby messages regardless of user authentication
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const funds = await userModel.getFunds(user.user_id);
+
     lobbyMessages = await getLobbyMessages();
 
     res.render("root", {
@@ -81,6 +85,7 @@ router.get("/", async (req: Request, res: Response) => {
       friends: user ? user.friends : [],
       requests: user ? user.requests : [],
       lobbyMessages: lobbyMessages, // Pass messages to template
+      funds: funds ? funds.funds : 0,
     });
   } catch (error) {
     console.error("Home page error:", error);
@@ -132,6 +137,33 @@ router.get("/reset-password", (req, res) => {
     title: "Reset Password",
     token,
   });
+});
+
+router.post("/addFunds", async (req: Request, res: Response) => {
+  const { fundsAmount } = req.body;
+  // @ts-ignore
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ message: "You have to login first!" });
+  }
+
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await userModel.addFunds(userId, fundsAmount);
+    const funds = await userModel.getFunds(userId);
+
+    res
+      .status(200)
+      .json({ message: "Funds added successfully", funds: funds.funds });
+  } catch (error) {
+    console.error("Error adding funds:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 export default router;

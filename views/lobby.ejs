@@ -74,11 +74,14 @@
       <div id="games-list-container">
         <!-- Games go here-->
       </div>
+      <div id="funds-container">You currently have $<%=funds%> funds </div>
+
     </section>
 
     <!-- Actions, need to link them to the correct routes -->
     <section style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
-      <button>Add Funds</button>
+      <button id="add-funds-button">Add Funds</button>
+      <%- include('shared/add-funds') %> 
       <button>Cash Out</button>
       <button id="show-join-form">Join an existing game</button>
       <%- include('shared/join-game') %> 

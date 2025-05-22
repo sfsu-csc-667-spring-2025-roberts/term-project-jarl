@@ -24,6 +24,21 @@ const gamesListContainer = document.querySelector<HTMLDivElement>(
   "#games-list-container",
 );
 
+const addFundsButton =
+  document.querySelector<HTMLButtonElement>("#add-funds-button");
+
+const addFundsModal =
+  document.querySelector<HTMLDivElement>("#add-funds-modal");
+
+const hideAddFundsModal = document.querySelector<HTMLButtonElement>(
+  "#hide-add-funds-modal",
+);
+
+const addFundsForm = document.querySelector<HTMLFormElement>("#add-funds-form");
+
+const fundsContainer =
+  document.querySelector<HTMLDivElement>("#funds-container");
+
 createGameButton!.addEventListener("click", (e) => {
   e.preventDefault();
   console.log("create game button clicked");
@@ -80,4 +95,54 @@ socket.on("game:getGames", (data) => {
     gameItem.appendChild(passwordDiv);
     gamesListContainer!.appendChild(gameItem);
   }
+});
+
+addFundsButton!.addEventListener("click", (e) => {
+  e.preventDefault();
+  addFundsModal!.classList.toggle("hidden");
+});
+
+hideAddFundsModal!.addEventListener("click", (e) => {
+  e.preventDefault();
+  addFundsModal!.classList.toggle("hidden");
+});
+
+addFundsModal!.addEventListener("click", (e) => {
+  if (e.target === addFundsModal) {
+    addFundsModal!.classList.toggle("hidden");
+  }
+});
+
+addFundsForm!.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const formData = new FormData(addFundsForm!);
+  const data = Object.fromEntries(formData.entries());
+
+  fetch("/addFunds", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => {
+      if (response.ok) {
+        // window.location.href = "/"
+        console.log(response);
+        return response.json();
+      } else {
+        console.error("Failed to add funds");
+      }
+    })
+    .then((data) => {
+      console.log("Server response:", data);
+      if (data.funds) {
+        fundsContainer!.textContent = `You currently have $${data.funds} funds`;
+      }
+    })
+    .catch((error) => {
+      console.error("Error adding funds:", error);
+    });
+
+  addFundsModal!.classList.toggle("hidden");
 });
