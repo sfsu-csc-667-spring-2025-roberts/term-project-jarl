@@ -4,7 +4,7 @@ const CREATE_GAME_STATE_TABLE = `INSERT INTO game_state (game_id, pot, current_t
     VALUES ($1, $2, $3, $4, $5, $6)`;
 const GET_PLAYER_STACK = `SELECT stack FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2`;
 const UPDATE_PLAYER_STACK = `UPDATE "gamePlayers" SET stack = stack - $1 WHERE game_id = $2 AND user_id = $3`;
-const FOLD_PLAYER = `UPDATE "gamePlayers" SET folded = true WHERE game_id = $1 AND user_id = $2`;
+const FOLD_PLAYER = `UPDATE "gamePlayers" SET is_in_hand = false WHERE game_id = $1 AND user_id = $2`;
 const UPDATE_POT = `UPDATE game_state SET pot = $1, current_turn = $2, dealer = $3, last_raiser = $4, current_bet = $5 WHERE game_id = $6`;
 const GET_GAME_STATE = `SELECT * FROM game_state WHERE game_id = $1`;
 
@@ -20,11 +20,11 @@ class GameState {
   constructor(db: pgPromise.IDatabase<any>, numPlayers: number) {
     this.db = db;
     this.pot = 0;
-    this.currentTurn = 0;
+    this.currentTurn = 1;
     this.numPlayers = numPlayers;
     this.dealer = numPlayers;
     this.lastRaiser = null;
-    this.currentBet = 0;
+    this.currentBet = 1;
   }
 
   async createGameState(gameId: number): Promise<void> {

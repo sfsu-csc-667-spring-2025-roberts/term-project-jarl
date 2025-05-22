@@ -63,11 +63,27 @@ router.post("/join", async (request: Request, response: Response) => {
   }
 });
 
-router.get("/:gameId", (request: Request, response: Response) => {
+router.get("/:gameId", async (request: Request, response: Response) => {
   const { gameId } = request.params;
+
+  const gameState = await db.oneOrNone(
+    "SELECT * FROM game_state WHERE game_id = $1",
+    [gameId],
+  );
+
+  const gamePlayer = await db.oneOrNone(
+    'SELECT is_in_hand FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2',
+    [gameId, request.session.userId],
+  );
+
   // @ts-ignore
   const user = request.session.user;
-  response.render("games", { gameId, user });
+  response.render("games", {
+    gameId,
+    user,
+    isInHand: gamePlayer ? gamePlayer.is_in_hand : true,
+    gameStarted: gameState ? true : false,
+  });
 });
 
 router.post("/:gameId/leave", async (request: Request, response: Response) => {

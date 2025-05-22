@@ -38,11 +38,22 @@
       </div>
 
       <!-- Game Controls -->
-      <div id="action-buttons">
-        <button id="btn-call">Call</button>
-        <button id="btn-raise">Raise</button>
-        <button id="btn-fold">Fold</button>
-      </div>
+       <% if (!gameStarted) { %>
+        <div id="action-buttons">
+          <p>Waiting for host to start the game...</p>
+        </div>
+      
+      <% } else if (isInHand) { %>
+        <div id="action-buttons">
+          <button id="btn-call">Call</button>
+          <button id="btn-raise">Raise</button>
+          <button id="btn-fold">Fold</button>
+        </div>
+      <% } else { %>
+        <div id="action-buttons">
+          <p>Waiting for the next hand...</p>
+        </div>
+      <% } %>
 
 
       <!-- Game action buttons (call, raise, fold, etc.) and game chat  -->
