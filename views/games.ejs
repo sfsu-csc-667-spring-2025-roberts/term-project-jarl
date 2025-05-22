@@ -45,15 +45,23 @@
       
       <% } else if (isInHand) { %>
         <div id="action-buttons">
-          <button id="btn-call">Call</button>
-          <button id="btn-raise">Raise</button>
+          <button id="btn-call" disabled=<% stack === 0 %>>Call</button>
+          <button id="btn-raise" disabled=<% stack === 0 %>>Raise</button>
           <button id="btn-fold">Fold</button>
         </div>
+        <% if (stack === 0) { %>
+          <div class="text-danger">You don't have enough chips to bet.</div>
+        <% } %>
       <% } else { %>
         <div id="action-buttons">
           <p>Waiting for the next hand...</p>
         </div>
       <% } %>
+
+      <!-- Players Stack of money -->
+       <div id="player-stack">
+        Your Money: $<%= stack %>
+       </div>
 
 
       <!-- Game action buttons (call, raise, fold, etc.) and game chat  -->

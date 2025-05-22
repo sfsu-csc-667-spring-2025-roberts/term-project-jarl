@@ -72,7 +72,7 @@ router.get("/:gameId", async (request: Request, response: Response) => {
   );
 
   const gamePlayer = await db.oneOrNone(
-    'SELECT is_in_hand FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2',
+    'SELECT is_in_hand, stack FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2',
     [gameId, request.session.userId],
   );
 
@@ -83,6 +83,7 @@ router.get("/:gameId", async (request: Request, response: Response) => {
     user,
     isInHand: gamePlayer ? gamePlayer.is_in_hand : true,
     gameStarted: gameState ? true : false,
+    stack: gamePlayer ? gamePlayer.stack : 0,
   });
 });
 
