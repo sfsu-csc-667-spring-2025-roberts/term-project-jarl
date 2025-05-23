@@ -118,6 +118,7 @@ router.get("/reset-password", (req, res) => {
   });
 });
 
+// @ts-ignore
 router.post("/addFunds", async (req: Request, res: Response) => {
   const { fundsAmount } = req.body;
   // @ts-ignore

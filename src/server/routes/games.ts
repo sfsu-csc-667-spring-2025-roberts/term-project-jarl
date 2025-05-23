@@ -6,10 +6,15 @@ import db from "../db/connection";
 
 const router = express.Router();
 
+const DEPOSIT_TO_GAMEPLAYER_STACK = `UPDATE "gamePlayers" SET stack = $1 WHERE game_id = $2 AND user_id = $3`;
+const DEPOSIT_FROM_USER_STACK = `UPDATE users SET funds = funds - $1 WHERE user_id = $2`;
+const WITHDRAW_TO_USER_STACK = `UPDATE users SET funds = funds + $1 WHERE user_id = $2`;
+const GET_PLAYER_STACK = `SELECT stack FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2`;
+
 router.post("/create", async (request: Request, response: Response) => {
   // @ts-ignore
   const { user_id: userId, email, gravatar } = request.session.user;
-  const { gameName, gameMinPlayers, gameMaxPlayers, gamePassword } =
+  const { gameName, gameId, gameMinPlayers, gameMaxPlayers, gamePassword } =
     request.body;
 
   try {
@@ -26,6 +31,13 @@ router.post("/create", async (request: Request, response: Response) => {
       io.emit("game:getGames", {
         allGames,
       });
+      await db.none(DEPOSIT_TO_GAMEPLAYER_STACK, [50, gameId, userId]);
+      await db.none(DEPOSIT_FROM_USER_STACK, [50, userId]);
+
+      const stack = await db.oneOrNone(GET_PLAYER_STACK, [gameId, userId]);
+
+      console.log("stack: ", stack);
+
       response.redirect(`/games/${gameId}`);
     } else {
       response.status(500).send("error creating game here");
@@ -67,7 +79,7 @@ router.get("/:gameId", async (request: Request, response: Response) => {
   const { gameId } = request.params;
 
   const gameState = await db.oneOrNone(
-    "SELECT * FROM game_state WHERE game_id = $1",
+    "SELECT pot FROM game_state WHERE game_id = $1",
     [gameId],
   );
 
@@ -76,11 +88,14 @@ router.get("/:gameId", async (request: Request, response: Response) => {
     [gameId, request.session.userId],
   );
 
+  console.log("pot", gameState.pot);
+
   // @ts-ignore
   const user = request.session.user;
   response.render("games", {
     gameId,
     user,
+    pot: gameState ? gameState.pot : 0,
     isInHand: gamePlayer ? gamePlayer.is_in_hand : true,
     gameStarted: gameState ? true : false,
     stack: gamePlayer ? gamePlayer.stack : 0,
@@ -92,6 +107,17 @@ router.post("/:gameId/leave", async (request: Request, response: Response) => {
   // @ts-ignore
   const { user_id: userId } = request.session.user;
   const count = await Game.leaveGame(parseInt(gameId), userId);
+
+  const stack = await db.oneOrNone(GET_PLAYER_STACK, [gameId, userId]);
+
+  if (stack !== null && stack !== undefined) {
+    await db.none(WITHDRAW_TO_USER_STACK, [stack, userId]);
+  }
+  await db.none(
+    `DELETE FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2`,
+    [gameId, userId],
+  );
+
   const io = request.app.get<Server>("io");
   io.on("connection", (socket) => {
     socket.emit(`game:${gameId}:player-left`, {

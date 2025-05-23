@@ -34,7 +34,7 @@
         <div class="player-seat" id="player-3">Player 3</div>
         <div class="player-seat" id="player-4">Player 4</div>
 
-        <div id="pot">Pot: $0</div>
+        <div id="pot">Pot: $<%= pot %></div>
       </div>
 
       <!-- Game Controls -->
@@ -45,8 +45,8 @@
       
       <% } else if (isInHand) { %>
         <div id="action-buttons">
-          <button id="btn-call" disabled=<% stack === 0 %>>Call</button>
-          <button id="btn-raise" disabled=<% stack === 0 %>>Raise</button>
+          <button id="btn-call">Call</button>
+          <button id="btn-raise">Raise</button>
           <button id="btn-fold">Fold</button>
         </div>
         <% if (stack === 0) { %>
