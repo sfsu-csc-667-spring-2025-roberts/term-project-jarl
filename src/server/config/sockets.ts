@@ -35,15 +35,33 @@ const configureSockets = (io: Server, app: Express) => {
     );
     socket.join(user.id);
 
-    socket.on("join-room", (roomId) => {
+    socket.on("join-room", async (roomId: string) => {
       socket.join(roomId);
+
+      // Send current players in this room
+      try {
+        const players = await db.manyOrNone(
+          `SELECT users.email
+        FROM "gamePlayers"
+        JOIN users ON users.user_id = "gamePlayers".user_id
+        WHERE game_id = $1`,
+          [parseInt(roomId)],
+        );
+
+        const emails = players.map((p) => p.email);
+        socket.emit(`game:${roomId}:players`, emails);
+      } catch (err) {
+        console.error("Error loading players for room:", err);
+      }
     });
 
     socket.on("player-joined", ({ roomId, email }) => {
       socket.join(roomId);
+
       const room = io.sockets.adapter.rooms.get(roomId);
       const playerCount = room ? room.size : 1;
 
+      // Notify everyone in the room a new player joined
       io.to(roomId).emit(`game:${roomId.split("-")[1]}:player-joined`, {
         playerCount,
         email,
@@ -91,6 +109,16 @@ const configureSockets = (io: Server, app: Express) => {
         console.log(
           `User [${user.user_id}] disconnected: ${user.email} with session id ${id}`,
         );
+
+        // Let everyone in the room know the player left
+        const rooms = Array.from(socket.rooms).filter(
+          (room) => room !== socket.id,
+        );
+        for (const roomId of rooms) {
+          io.to(roomId).emit(`game:${roomId}:player-left`, {
+            email: user.email,
+          });
+        }
       }
     });
   });

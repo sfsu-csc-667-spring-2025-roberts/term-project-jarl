@@ -128,6 +128,18 @@
           }
         });
       });
+
+      //Updates seats if a player leaves
+      socket.on(`game:${roomId}:player-left`, ({ email }) => {
+        const seats = document.querySelectorAll(".player-seat");
+        for (const seat of seats) {
+          if (seat.textContent === email) {
+            seat.textContent = "";
+            seat.classList.add("d-none");
+            break;
+          }
+        }
+      });
     </script>
   </body>
 </html>
