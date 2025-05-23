@@ -1,8 +1,31 @@
 import express, { Request, Response } from "express";
 import db from "../db/connection";
 import { GameState } from "../db";
+import { Server } from "socket.io";
 
 const router = express.Router();
+
+const emitGameUpdate = async (
+  res: Response,
+  io: Server,
+  gameId: string,
+  gameState: GameState,
+) => {
+  res.status(200).json({
+    pot: gameState.getPot(),
+    currentTurn: gameState.getCurrentTurn(),
+    numPlayers: gameState.getNumPlayers(),
+    dealer: gameState.getDealer(),
+    lastRaiser: gameState.getLastRaiser(),
+    currentBet: gameState.getCurrentBet(),
+  });
+
+  io.to(gameId).emit(`game:${gameId}:update`, {
+    pot: gameState.getPot(),
+    currentTurn: gameState.getCurrentTurn(),
+    currentBet: gameState.getCurrentBet(),
+  });
+};
 
 // @ts-ignore
 router.post("/:gameId/call", async (req: Request, res: Response) => {
@@ -19,16 +42,15 @@ router.post("/:gameId/call", async (req: Request, res: Response) => {
     await gameState.call(userId, numericGameId);
     await gameState.save(numericGameId);
 
+    const playerStack = await gameState.getPlayerStack(userId, numericGameId);
+
+    // Add pot update emission
+    const io = req.app.get("io");
+    io.to(gameId).emit(`game:${gameId}:pot-updated`, gameState.getPot());
+    io.to(gameId).emit(`game:${gameId}:stack-updated`, playerStack);
+
     if (gameState) {
-      res.status(200).json({
-        pot: gameState.getPot(),
-        currentTurn: gameState.getCurrentTurn(),
-        numPlayers: gameState.getNumPlayers(),
-        dealer: gameState.getDealer(),
-        lastRaiser: gameState.getLastRaiser(),
-        currentBet: gameState.getCurrentBet(),
-      });
-      console.log("Game state after call:", gameState);
+      await emitGameUpdate(res, io, gameId, gameState);
     } else {
       res.status(400).json({ error: "Failed to call" });
     }
@@ -47,25 +69,20 @@ router.post("/:gameId/raise", async (req: Request, res: Response) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { amount } = req.body;
-  if (!amount) {
-    return res.status(400).json({ error: "Amount is required" });
-  }
-
   try {
     const gameState = await GameState.load(db, numericGameId);
-    await gameState.raise(userId, numericGameId, amount);
+    await gameState.raise(userId, numericGameId);
     await gameState.save(numericGameId);
 
+    const playerStack = await gameState.getPlayerStack(userId, numericGameId);
+
+    // Add pot update emission
+    const io = req.app.get("io");
+    io.to(gameId).emit(`game:${gameId}:pot-updated`, gameState.getPot());
+    io.to(gameId).emit(`game:${gameId}:stack-updated`, playerStack);
+
     if (gameState) {
-      res.status(200).json({
-        pot: gameState.getPot(),
-        currentTurn: gameState.getCurrentTurn(),
-        numPlayers: gameState.getNumPlayers(),
-        dealer: gameState.getDealer(),
-        lastRaiser: gameState.getLastRaiser(),
-        currentBet: gameState.getCurrentBet(),
-      });
+      await emitGameUpdate(res, io, gameId, gameState);
     } else {
       res.status(400).json({ error: "Failed to raise" });
     }
@@ -91,14 +108,8 @@ router.post("/:gameId/fold", async (req: Request, res: Response) => {
     await gameState.save(numericGameId);
 
     if (gameState) {
-      res.status(200).json({
-        pot: gameState.getPot(),
-        currentTurn: gameState.getCurrentTurn(),
-        numPlayers: gameState.getNumPlayers(),
-        dealer: gameState.getDealer(),
-        lastRaiser: gameState.getLastRaiser(),
-        currentBet: gameState.getCurrentBet(),
-      });
+      const io = req.app.get("io");
+      await emitGameUpdate(res, io, gameId, gameState);
     } else {
       res.status(400).json({ error: "Failed to fold" });
     }

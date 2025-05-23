@@ -52,15 +52,15 @@ class GameState {
     }
   }
 
-  async raise(playerId: number, gameId: number, amount: number): Promise<void> {
+  async raise(playerId: number, gameId: number): Promise<void> {
     const playerStack = await this.db.one(GET_PLAYER_STACK, [gameId, playerId]);
 
-    const currentBet = this.currentBet;
-    const totalBet = currentBet + amount;
-    if (playerStack.stack >= totalBet && amount >= currentBet) {
-      await this.db.none(UPDATE_PLAYER_STACK, [totalBet, gameId, playerId]);
-      this.pot += totalBet;
-      this.currentBet = totalBet;
+    const currentBet = this.currentBet * 2;
+
+    if (playerStack.stack >= currentBet) {
+      await this.db.none(UPDATE_PLAYER_STACK, [currentBet, gameId, playerId]);
+      this.addToPot(currentBet);
+      this.currentBet = currentBet;
       this.lastRaiser = playerId;
     } else {
       throw new Error("Not enough chips to raise");
@@ -69,6 +69,11 @@ class GameState {
 
   async fold(playerId: number, gameId: number): Promise<void> {
     await this.db.none(FOLD_PLAYER, [gameId, playerId]);
+  }
+
+  async getPlayerStack(playerId: number, gameId: number): Promise<number> {
+    const playerStack = await this.db.one(GET_PLAYER_STACK, [gameId, playerId]);
+    return playerStack.stack;
   }
 
   async save(gameId: number) {

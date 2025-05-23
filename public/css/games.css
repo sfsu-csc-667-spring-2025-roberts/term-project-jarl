@@ -175,6 +175,11 @@ main {
   background-color: #222;
 }
 
+#action-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 #game-chat-container {
   position: absolute;
   bottom: 20px;

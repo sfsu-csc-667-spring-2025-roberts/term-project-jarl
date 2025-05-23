@@ -172,6 +172,11 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     message: "Game started successfully",
   });
 
+  io.to(gameId).emit(`game:${gameId}:started`, {
+    currentTurn: 1,
+    players: players.map((p) => ({ user_id: p.user_id, username: p.username })),
+  });
+
   response.redirect(`/games/${gameId}`);
 });
 

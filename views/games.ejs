@@ -72,13 +72,50 @@
     </div>
 
     <script>
+      // Initialize socket and roomId after DOM is loaded
       const socket = io();
-      const roomId = document.getElementById("room-id")?.value;
+      const roomId = document.getElementById("room-id").value; // Now accessible
+      const userId = "<%= user.user_id %>";
 
+      // Listen for game started event specific to the room
+      socket.on(`game:${roomId}:started`, function(data) {
+        const actionButtons = document.getElementById("action-buttons");
+        if (actionButtons) {
+          actionButtons.innerHTML = `
+            <button id="btn-call">Call</button>
+            <button id="btn-raise">Raise</button>
+            <button id="btn-fold">Fold</button>
+          `;
+
+          // Disable buttons if not user's turn
+          // if (data.currentTurn !== userId) {
+          //   document.getElementById("btn-call").disabled = true;
+          //   document.getElementById("btn-raise").disabled = true;
+          //   document.getElementById("btn-fold").disabled = true;
+          // }
+        }
+      });
+
+      // Listen for pot updated event
+      socket.on(`game:${roomId}:pot-updated`, (newPot) => {
+        const potElement = document.getElementById("pot");
+        if (potElement) {
+          potElement.innerHTML = `Pot: $${newPot}`;
+        }
+      });
+
+      // Listen for player stack updated event
+      socket.on(`game:${roomId}:stack-updated`, (newPot) => {
+        const potElement = document.getElementById("player-stack");
+        if (potElement) {
+          potElement.innerHTML = `Your Money: $${newPot}`;
+        }
+      });
+
+      // Existing code for joining rooms, chat, etc.
       console.log("Joining room", roomId);
       if (roomId) {
         socket.emit("join-room", roomId);
-
         socket.emit("player-joined", {
           roomId: `room-${roomId}`,
           email: "<%= user.email %>"

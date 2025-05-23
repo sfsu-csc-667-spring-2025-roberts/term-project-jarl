@@ -71,7 +71,7 @@ startGameButton!.addEventListener("click", (e) => {
   if (startGameButton!.disabled) {
     return;
   }
-  console.log("sstart game btn clicked");
+  console.log("start game btn clicked");
   startGameButton!.disabled = true;
 
   fetch(`/games/${gameId}/start`, {
