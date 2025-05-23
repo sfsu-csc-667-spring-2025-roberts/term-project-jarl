@@ -54,11 +54,11 @@ router.post("/signup", function (req, res) {
       const user = await userModel.create(username, email, password);
 
       // Set user in session
-      req.session.userId = user.id;
+      req.session.userId = user.user_id;
 
       return res.status(201).json({
         message: "User created successfully",
-        user: { id: user.id, username: user.username, email: user.email },
+        user: { id: user.user_id, username: user.username, email: user.email },
       });
     } catch (error) {
       console.error("Error signing up:", error);
@@ -107,7 +107,7 @@ router.post("/signin", function (req, res) {
 
       return res.status(200).json({
         message: "Signed in successfully",
-        user: { id: user.id, username: user.username, email: user.email },
+        user: { id: user.user_id, username: user.username, email: user.email },
       });
     } catch (error) {
       console.error("Error signing in:", error);
@@ -214,7 +214,7 @@ router.post("/reset-password", function (req, res) {
       }
 
       // Update password
-      await userModel.updatePassword(user.id, password);
+      await userModel.updatePassword(user.user_id, password);
 
       // Delete token
       await userModel.deletePasswordResetToken(token);

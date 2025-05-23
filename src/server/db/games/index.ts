@@ -155,6 +155,30 @@ const getCardsHeldForPlayer = async (gamePlayerId: number) => {
   return cardsHeld;
 };
 
+// create the 5 cards in the middle and insert into game cards
+const createDealerCards = async (gameId: number, cardId: number) => {
+  const cardHeldId = await db.one(
+    `
+    INSERT INTO "gameCards" (game_id, card_id)
+    VALUES ($1, $2)`,
+    [gameId, cardId],
+  );
+  return cardHeldId;
+};
+
+const getDealerCards = async (gameId: number) => {
+  const cardsHeld = await db.manyOrNone(
+    `
+    SELECT *
+    FROM "gameCards"
+    WHERE game_id = $1
+    ORDER BY game_card_id
+  `,
+    [gameId],
+  );
+  return cardsHeld;
+};
+
 const GET_ALL_GAMES_SQL = `SELECT game_id, password FROM games ORDER BY game_id DESC`;
 
 const getAllGames = async () => {
