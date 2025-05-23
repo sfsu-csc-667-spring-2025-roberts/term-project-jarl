@@ -140,7 +140,7 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
   const { gameId } = request.params;
   const hostId = await Game.findHostId(parseInt(gameId));
 
-  const io = request.app.get<Server>("io");
+  const io = request.app.get("io");
 
   if (hostId !== userId) {
     console.log("You are not the host. You cannot start the game;");
@@ -161,9 +161,11 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
   await gameState.createGameState(parseInt(gameId));
   console.log("started game: ", gameId);
 
-  io.emit("gameChatMessage", {
-    user: "Dealer",
-    content: "Game has started...",
+  io.to(gameId).emit(`chat-message:${gameId}`, {
+    sender: "Dealer",
+    message: "Game has started...",
+    gravatar: "",
+    timestamp: new Date().getTime(),
   });
 
   io.emit(`game:${gameId}:start:success`, {
@@ -191,23 +193,27 @@ router.post("/:gameId/bet", async (request: Request, response: Response) => {
     [gameId],
   );
 
-  const io = request.app.get<Server>("io");
+  const io = request.app.get("io");
 
   // if its not current user's turn
   if (players[gameState.getCurrentTurn()].user_id !== userId) {
     console.log("Not your turn");
-    io.emit("gameChatMessage", {
-      user: "Dealer",
-      content: `It is not ${user.username}'s turn...`,
+    io.to(gameId).emit(`chat-message:${gameId}`, {
+      sender: "Dealer",
+      message: `It is not ${user.username}'s turn...`,
+      gravatar: "",
+      timestamp: new Date().getTime(),
     });
     response.sendStatus(403).json({ message: "Not your turn" });
     return;
   }
 
   gameState.addToPot(betAmount);
-  io.emit("gameChatMessage", {
-    user: "Dealer",
-    content: `${user.username} bet $${betAmount}...`,
+  io.to(gameId).emit(`chat-message:${gameId}`, {
+    sender: "Dealer",
+    message: `${user.username} has bet ${betAmount}...`,
+    gravatar: "",
+    timestamp: new Date().getTime(),
   });
 
   await db.none(
@@ -220,9 +226,11 @@ router.post("/:gameId/bet", async (request: Request, response: Response) => {
   );
 
   gameState.nextTurn();
-  io.emit("gameChatMessage", {
-    user: "Dealer",
-    content: `It is now ${user.username}'s turn...`,
+  io.to(gameId).emit(`chat-message:${gameId}`, {
+    sender: "Dealer",
+    message: `It is now ${players[gameState.getCurrentTurn()].username}'s turn...`,
+    gravatar: "",
+    timestamp: new Date().getTime(),
   });
 
   response
@@ -245,29 +253,35 @@ router.post("/:gameId/fold", async (request: Request, response: Response) => {
     [gameId],
   );
 
-  const io = request.app.get<Server>("io");
+  const io = request.app.get("io");
 
   // if its not current user's turn
   if (players[gameState.getCurrentTurn()].user_id !== userId) {
     console.log("Not your turn");
-    io.emit("gameChatMessage", {
-      user: "Dealer",
-      content: `It is not ${user.username}'s turn...`,
+    io.to(gameId).emit(`chat-message:${gameId}`, {
+      sender: "Dealer",
+      message: `It is not ${user.username}'s turn...`,
+      gravatar: "",
+      timestamp: new Date().getTime(),
     });
     response.sendStatus(403).json({ message: "Not your turn" });
     return;
   }
 
   await gameState.fold(userId, parseInt(gameId));
-  io.emit("gameChatMessage", {
-    user: "Dealer",
-    content: `${user.username} folded...`,
+  io.to(gameId).emit(`chat-message:${gameId}`, {
+    sender: "Dealer",
+    message: `${user.username} has folded...`,
+    gravatar: "",
+    timestamp: new Date().getTime(),
   });
 
   gameState.nextTurn();
-  io.emit("gameChatMessage", {
-    user: "Dealer",
-    content: `It is now ${user.username}'s turn...`,
+  io.to(gameId).emit(`chat-message:${gameId}`, {
+    sender: "Dealer",
+    message: `It is now ${user.username}'s turn...`,
+    gravatar: "",
+    timestamp: new Date().getTime(),
   });
 
   response.status(200).json({ message: `${user.username} has folded...` });
