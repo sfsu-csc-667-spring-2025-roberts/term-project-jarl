@@ -46,7 +46,7 @@ class User {
     expiresAt: Date,
   ) {
     return this.db.one(
-      "INSERT INTO password_reset_tokens(email, token, expires_at) VALUES($1, $2, $3) RETURNING user_id",
+      "INSERT INTO password_reset_tokens(email, token, expires_at) VALUES($1, $2, $3) RETURNING id",
       [email, token, expiresAt],
     );
   }
