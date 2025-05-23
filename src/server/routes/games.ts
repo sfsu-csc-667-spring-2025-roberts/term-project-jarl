@@ -151,7 +151,7 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     return;
   }
 
-  const players = await db.one(
+  const players = await db.many(
     `SELECT * FROM "gamePlayers" WHERE game_id = $1`,
     [gameId],
   );
