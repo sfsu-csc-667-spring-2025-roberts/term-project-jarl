@@ -1,6 +1,7 @@
 import express from "express";
 import { Request, Response } from "express";
 import { ChatMessage } from "global";
+
 import db from "../db/connection";
 
 const router = express.Router();
@@ -55,7 +56,7 @@ router.post("/:roomId", (request: Request, response: Response) => {
 
   console.log({ broadcastMessage });
 
-  io.emit(`chat-message:${id}`, broadcastMessage);
+  io.to(id).emit(`chat-message:${id}`, broadcastMessage);
 
   response.status(200).send();
 });

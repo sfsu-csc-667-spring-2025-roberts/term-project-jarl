@@ -36,6 +36,16 @@ import session from "express-session";
 import { setupFriendSocket } from "./socket/friends";
 setupFriendSocket(io);
 
+// Connects a user to the room
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  socket.on("join-room", (roomId: string) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  });
+});
+
 // Add a timeout to force exit if server hangs
 // console.log("Starting server with safety timeout...");
 // const safetyTimeout = setTimeout(() => {

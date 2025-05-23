@@ -87,8 +87,12 @@ router.get("/:gameId", async (request: Request, response: Response) => {
     'SELECT is_in_hand, stack FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2',
     [gameId, request.session.userId],
   );
-
-  console.log("pot", gameState.pot);
+  if (!gameState) {
+    console.warn(`No game state found for game ID ${gameId}`);
+  } else {
+    console.log("pot", gameState.pot);
+  }
+  // console.log("pot", gameState.pot);
 
   // @ts-ignore
   const user = request.session.user;

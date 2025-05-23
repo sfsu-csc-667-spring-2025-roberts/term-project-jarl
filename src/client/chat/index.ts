@@ -1,7 +1,21 @@
 import type { ChatMessage } from "global";
 import { socket } from "../socket";
 
+console.log("socket.ts loaded", socket);
+
 const roomId = document.querySelector<HTMLInputElement>("input#room-id")?.value;
+
+console.log("roomId found:", roomId);
+
+socket.on("connect", () => {
+  console.log("✅ Socket connected:", socket.id);
+});
+
+// joins the room for chat
+if (roomId) {
+  console.log("Emitting join-room with", roomId);
+  socket.emit("join-room", roomId);
+}
 const parent = document.querySelector("section#chat div");
 const messageInput = document.querySelector<HTMLInputElement>(
   "section#chat form input[name=message]",
