@@ -35,6 +35,21 @@ const configureSockets = (io: Server, app: Express) => {
     );
     socket.join(user.id);
 
+    socket.on("join-room", (roomId) => {
+      socket.join(roomId);
+    });
+
+    socket.on("player-joined", ({ roomId, email }) => {
+      socket.join(roomId);
+      const room = io.sockets.adapter.rooms.get(roomId);
+      const playerCount = room ? room.size : 1;
+
+      io.to(roomId).emit(`game:${roomId.split("-")[1]}:player-joined`, {
+        playerCount,
+        email,
+      });
+    });
+
     // testing purposes
     // sendOneCardToClient(socket);
 

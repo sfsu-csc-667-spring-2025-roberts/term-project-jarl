@@ -8,7 +8,7 @@ const roomId = document.querySelector<HTMLInputElement>("input#room-id")?.value;
 console.log("roomId found:", roomId);
 
 socket.on("connect", () => {
-  console.log("✅ Socket connected:", socket.id);
+  console.log("Socket connected:", socket.id);
 });
 
 // joins the room for chat
