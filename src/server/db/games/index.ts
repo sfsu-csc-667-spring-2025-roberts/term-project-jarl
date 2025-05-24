@@ -130,7 +130,6 @@ const getShuffledCards = async () => {
 const CREATE_CARDS_HELD_SQL = `
   INSERT INTO "cardsHeld" (game_player_id, card_id)
   VALUES ($1, $2)
-  RETURNING card_held_id
 `;
 const GET_CARDS_HELD_SQL = `
   SELECT card_held_id, game_player_id, card_id
@@ -143,11 +142,7 @@ const createCardsHeldForPlayer = async (
   gamePlayerId: number,
   cardId: number,
 ) => {
-  const cardHeldId = await db.one(CREATE_CARDS_HELD_SQL, [
-    gamePlayerId,
-    cardId,
-  ]);
-  return cardHeldId;
+  await db.none(CREATE_CARDS_HELD_SQL, [gamePlayerId, cardId]);
 };
 
 const getCardsHeldForPlayer = async (gamePlayerId: number) => {
@@ -157,13 +152,12 @@ const getCardsHeldForPlayer = async (gamePlayerId: number) => {
 
 // create the 5 cards in the middle and insert into game cards
 const createDealerCards = async (gameId: number, cardId: number) => {
-  const cardHeldId = await db.one(
+  await db.none(
     `
     INSERT INTO "gameCards" (game_id, card_id)
     VALUES ($1, $2)`,
     [gameId, cardId],
   );
-  return cardHeldId;
 };
 
 const getDealerCards = async (gameId: number) => {
@@ -197,4 +191,6 @@ export default {
   createCardsHeldForPlayer,
   getCardsHeldForPlayer,
   getAllGames,
+  createDealerCards,
+  getDealerCards,
 };

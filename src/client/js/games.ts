@@ -117,7 +117,12 @@ function getCardDisplay(value: string): string {
   }
 }
 
-function renderCard(card: { value: string; shape: string }) {
+function renderCard(card: {
+  value: string;
+  shape: string;
+  playerId: number;
+  isDealer: boolean;
+}) {
   const container = document.getElementById("card-container");
   if (!container) return;
 
@@ -132,6 +137,10 @@ function renderCard(card: { value: string; shape: string }) {
   suitDiv.className = "card-suit";
   suitDiv.textContent = card.shape;
 
+  if (card.isDealer) {
+    cardDiv.classList.add("dealer-card");
+  }
+
   cardDiv.appendChild(valueDiv);
   cardDiv.appendChild(suitDiv);
   container.appendChild(cardDiv);
@@ -140,6 +149,7 @@ function renderCard(card: { value: string; shape: string }) {
 // When card is received from backend
 socket.on("dealCard", (card) => {
   console.log("Card received from backend:", card);
+  // only render the card if it belongs to the current player
   renderCard(card);
 });
 // In-Game Chat functionality

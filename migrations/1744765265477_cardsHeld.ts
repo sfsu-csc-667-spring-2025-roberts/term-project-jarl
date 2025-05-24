@@ -9,11 +9,13 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       type: "integer",
       notNull: true,
       references: '"gamePlayers"',
+      onDelete: "CASCADE",
     },
     card_id: {
       type: "integer",
       notNull: true,
       references: '"cards"',
+      onDelete: "CASCADE",
     },
   });
 }

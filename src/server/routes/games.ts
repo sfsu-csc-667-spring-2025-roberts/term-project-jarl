@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { Game, GameState } from "../db";
 import { Server } from "socket.io";
 import db from "../db/connection";
+import { socket } from "../../client/socket";
 
 const router = express.Router();
 
@@ -113,6 +114,10 @@ router.post("/:gameId/leave", async (request: Request, response: Response) => {
   const count = await Game.leaveGame(parseInt(gameId), userId);
 
   const stack = await db.oneOrNone(GET_PLAYER_STACK, [gameId, userId]);
+  const gamePlayer = await db.oneOrNone(
+    `SELECT * FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2`,
+    [gameId, userId],
+  );
 
   if (stack !== null && stack !== undefined) {
     await db.none(WITHDRAW_TO_USER_STACK, [stack, userId]);
@@ -121,6 +126,15 @@ router.post("/:gameId/leave", async (request: Request, response: Response) => {
     `DELETE FROM "gamePlayers" WHERE game_id = $1 AND user_id = $2`,
     [gameId, userId],
   );
+
+  // await db.none(
+  //   `DELETE FROM "cardsHeld" WHERE game_player_id = $1`,
+  //   [gamePlayer.game_player_id]
+  // );
+  // await db.none(
+  //   `DELETE FROM "gamePlayers" WHERE game_player_id = $1`,
+  //   [gamePlayer.game_player_id]
+  // );
 
   const io = request.app.get<Server>("io");
   io.on("connection", (socket) => {
@@ -176,6 +190,52 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     currentTurn: 1,
     players: players.map((p) => ({ user_id: p.user_id, username: p.username })),
   });
+  // get shuffled cards
+  // loop through shuffled cards and assign to players using
+  // createCardsHeldForPlayer,
+  // getCardsHeldForPlayer,
+  // getAllGames,
+  // createDealerCards,
+  // getDealerCards,
+  // and create 5 cards for the table as well
+  const shuffledCards = await Game.getShuffledCards();
+  const playerCards = shuffledCards.slice(0, players.length * 2);
+  const tableCards = shuffledCards.slice(
+    players.length * 2,
+    players.length * 2 + 5,
+  );
+  for (let i = 0; i < players.length; i++) {
+    const playerId = players[i].game_player_id;
+    const card1 = playerCards[i * 2];
+    const card2 = playerCards[i * 2 + 1];
+    await Game.createCardsHeldForPlayer(playerId, card1.card_id);
+    await Game.createCardsHeldForPlayer(playerId, card2.card_id);
+    const playerHand = await Game.getCardsHeldForPlayer(playerId);
+    // send through socket
+    // only send cards if playerId is the current user
+    if (playerId === userId) {
+      io.emit("dealCard", {
+        value: card1.value,
+        shape: card1.shape,
+        playerId: userId,
+      });
+      io.emit("dealCard", {
+        value: card2.value,
+        shape: card2.shape,
+        playerId: userId,
+      });
+    }
+  }
+  for (let i = 0; i < tableCards.length; i++) {
+    const card = tableCards[i];
+    await Game.createDealerCards(parseInt(gameId), card.card_id);
+    io.emit("dealCard", {
+      value: card.value,
+      shape: card.shape,
+      playerId: -1,
+      isDealer: true,
+    });
+  }
 
   response.redirect(`/games/${gameId}`);
 });
