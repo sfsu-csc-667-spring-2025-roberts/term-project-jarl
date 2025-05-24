@@ -3,7 +3,6 @@ import db from "../connection";
 import { default as Game } from "./index";
 import { Request, Response } from "express";
 
-// TODO add logic for resetting game
 const rotationLogic = async (
   gameId: number,
   userId: number,
@@ -54,9 +53,6 @@ const rotationLogic = async (
   let nextRound = currGame.round;
   if (nextTurn === 1) {
     nextRound = (currGame.round + 1) % 5;
-    // if (nextRound === 0) {
-    //   nextRound = 1;
-    // }
   }
 
   await db.none(`UPDATE games SET turn = $1, round = $2 WHERE game_id = $3`, [

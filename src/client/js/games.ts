@@ -146,13 +146,11 @@ function renderCard(card: {
   container.appendChild(cardDiv);
 }
 
-// When card is received from backend
 socket.on("dealCard", (card) => {
   console.log("Card received from backend:", card);
-  // only render the card if it belongs to the current player
+  console.log("card.playerId:", card.playerId);
   renderCard(card);
 });
-// In-Game Chat functionality
 const chatForm = document.getElementById("game-chat-form") as HTMLFormElement;
 const chatInput = document.getElementById(
   "game-chat-input",

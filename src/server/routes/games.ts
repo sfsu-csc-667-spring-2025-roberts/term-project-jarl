@@ -127,15 +127,6 @@ router.post("/:gameId/leave", async (request: Request, response: Response) => {
     [gameId, userId],
   );
 
-  // await db.none(
-  //   `DELETE FROM "cardsHeld" WHERE game_player_id = $1`,
-  //   [gamePlayer.game_player_id]
-  // );
-  // await db.none(
-  //   `DELETE FROM "gamePlayers" WHERE game_player_id = $1`,
-  //   [gamePlayer.game_player_id]
-  // );
-
   const io = request.app.get<Server>("io");
   io.on("connection", (socket) => {
     socket.emit(`game:${gameId}:player-left`, {
@@ -190,14 +181,7 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     currentTurn: 1,
     players: players.map((p) => ({ user_id: p.user_id, username: p.username })),
   });
-  // get shuffled cards
-  // loop through shuffled cards and assign to players using
-  // createCardsHeldForPlayer,
-  // getCardsHeldForPlayer,
-  // getAllGames,
-  // createDealerCards,
-  // getDealerCards,
-  // and create 5 cards for the table as well
+
   const shuffledCards = await Game.getShuffledCards();
   const playerCards = shuffledCards.slice(0, players.length * 2);
   const tableCards = shuffledCards.slice(
@@ -211,8 +195,7 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
     await Game.createCardsHeldForPlayer(playerId, card1.card_id);
     await Game.createCardsHeldForPlayer(playerId, card2.card_id);
     const playerHand = await Game.getCardsHeldForPlayer(playerId);
-    // send through socket
-    // only send cards if playerId is the current user
+
     if (playerId === userId) {
       io.emit("dealCard", {
         value: card1.value,
@@ -240,7 +223,6 @@ router.post("/:gameId/start", async (request: Request, response: Response) => {
   response.redirect(`/games/${gameId}`);
 });
 
-// create routes for betting (updating potSize in game and updating turn in game)
 router.post("/:gameId/bet", async (request: Request, response: Response) => {
   const { gameId } = request.params;
   // @ts-ignore

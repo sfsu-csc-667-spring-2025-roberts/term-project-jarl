@@ -150,7 +150,6 @@ const getCardsHeldForPlayer = async (gamePlayerId: number) => {
   return cardsHeld;
 };
 
-// create the 5 cards in the middle and insert into game cards
 const createDealerCards = async (gameId: number, cardId: number) => {
   await db.none(
     `
